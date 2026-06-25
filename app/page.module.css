@@ -1,0 +1,183 @@
+.main {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px 16px 56px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.logo {
+  width: 38px;
+  height: auto;
+  flex: none;
+  filter: drop-shadow(0 2px 4px rgba(217,112,26,.22));
+}
+
+.title {
+  font-family: var(--maru);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  letter-spacing: -.01em;
+}
+
+.title span {
+  color: var(--yuzu-deep);
+}
+
+.hero {
+  padding: 8px 0 22px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--yuzu-deep);
+  font-weight: 700;
+}
+
+.heroHead {
+  font-family: var(--maru);
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1.18;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  margin: 8px 0 0;
+}
+
+.heroSub {
+  font-family: var(--kaku);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin: 8px 0 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tile {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 18px 16px;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+
+.tile::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--yuzu);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform .18s ease;
+}
+
+.tile:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: var(--line-2);
+}
+
+.tile:hover::after {
+  transform: scaleY(1);
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--yuzu);
+  outline-offset: 2px;
+}
+
+.tileTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.glyph {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  background: var(--yuzu-wash-2);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.tileName {
+  font-family: var(--maru);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0 0 5px;
+}
+
+.tileJp {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  font-weight: 400;
+  letter-spacing: .04em;
+}
+
+.tileDesc {
+  font-family: var(--kaku);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  margin: 0 0 13px;
+}
+
+.tileStatus {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--kaku);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
+}
+
+.tileStatus .play {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--yuzu-deep);
+}
+
+.dotmark {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--line-2);
+  flex: none;
+}
