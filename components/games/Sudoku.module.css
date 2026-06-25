@@ -80,8 +80,8 @@
   box-shadow: inset 0 0 0 2.5px #D5573B !important;
 }
 
-/* Peer cells (same row / col / box): very light tint — digits stay readable */
-.peer { background: var(--yuzu-wash-2); }
+/* Peer cells: tinted background; use ink-soft so digits stay readable on the warm bg */
+.peer { background: var(--yuzu-wash-2); color: var(--ink-soft); }
 
 /* Same digit as selected */
 .sameVal { background: var(--yuzu-wash); }
