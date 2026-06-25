@@ -1,42 +1,50 @@
+/* --sc inherited from Sudoku's .wrapper; fallback to 44px */
 .pad {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  padding: 12px 0;
-  max-width: 340px;
+  grid-template-columns: repeat(9, var(--sc, 44px));
+  gap: 7px;
+  width: calc(9 * var(--sc, 44px) + 8 * 7px);
   margin: 0 auto;
 }
 
+@media (max-width: 480px) {
+  .pad { gap: 5px; width: calc(9 * var(--sc, 44px) + 8 * 5px); }
+}
+
 .digit {
-  aspect-ratio: 1;
-  border: 1.5px solid var(--line-2);
-  border-radius: var(--radius-sm);
-  background: var(--card);
-  color: var(--ink);
+  /* Taller than square: aspect-ratio 1/1.15 like prototype */
+  aspect-ratio: 1 / 1.15;
+  display: grid;
+  place-items: center;
   font-family: var(--maru);
-  font-size: 1.25rem;
   font-weight: 700;
+  font-size: clamp(17px, 5vw, 22px);
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.1s, border-color 0.1s;
+  transition: border-color 0.1s, color 0.1s, background 0.1s;
+  font-variant-numeric: tabular-nums;
   -webkit-tap-highlight-color: transparent;
 }
 
 .digit:hover:not(:disabled) {
-  background: var(--yuzu-wash);
   border-color: var(--yuzu);
+  color: var(--yuzu-deep);
 }
 
 .digit:active:not(:disabled) {
-  background: var(--yuzu-wash-2);
+  background: var(--yuzu-wash);
 }
 
-.digit:disabled {
-  opacity: 0.3;
-  cursor: default;
+.digit:focus-visible {
+  outline: 2px solid var(--yuzu);
+  outline-offset: 2px;
 }
 
-.erase {
-  font-size: 1.1rem;
-  background: transparent;
-  border-color: var(--line);
+.dim {
+  color: var(--ink-faint);
+  opacity: 0.4;
+  pointer-events: none;
 }

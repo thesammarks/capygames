@@ -1,122 +1,158 @@
+/* --sc is the cell size, flows down to NumberPad via CSS var inheritance */
 .wrapper {
+  --sc: min(44px, calc((100vw - 64px) / 9));
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px;
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 0;
+  padding: 16px 16px 32px;
   width: 100%;
-  justify-content: flex-end;
-  padding-bottom: 8px;
 }
 
-.toolBtn {
-  font-family: var(--kaku);
-  font-size: 0.8rem;
-  background: none;
-  border: 1px solid var(--line-2);
-  border-radius: 8px;
-  padding: 5px 10px;
-  cursor: pointer;
-  color: var(--ink-soft);
-  transition: border-color 0.1s, color 0.1s;
-}
-
-.toolBtn:hover {
-  border-color: var(--yuzu);
-  color: var(--yuzu);
-}
-
-.toolBtn.active {
-  background: var(--yuzu-wash);
-  border-color: var(--yuzu);
-  color: var(--yuzu-deep);
+/* Board card */
+.board {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
 }
 
 /* 9×9 grid */
 .grid {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  border: 2px solid var(--ink);
-  border-radius: 4px;
+  grid-template-columns: repeat(9, var(--sc));
+  grid-template-rows: repeat(9, var(--sc));
+  border: 2.5px solid var(--ink);
+  border-radius: 5px;
   overflow: hidden;
-  width: 100%;
-  max-width: 360px;
-  aspect-ratio: 1;
+  touch-action: manipulation;
 }
 
 .cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line-2);
+  width: var(--sc);
+  height: var(--sc);
+  display: grid;
+  place-items: center;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   background: var(--card);
-  color: var(--ink);
+  /* User-entered digits in yuzu-deep; given digits in ink (overridden below) */
+  color: var(--yuzu-deep);
   font-family: var(--maru);
-  font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+  font-size: calc(var(--sc) * 0.52);
   font-weight: 500;
   cursor: pointer;
   padding: 0;
   position: relative;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.08s;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Box borders */
-.boxRight {
-  border-right: 2px solid var(--ink-soft);
-}
+/* Rightmost column: no double border */
+.cell:nth-child(9n) { border-right: none; }
+/* Bottom row: no double border */
+.cell:nth-child(n+73) { border-bottom: none; }
 
-.boxBottom {
-  border-bottom: 2px solid var(--ink-soft);
-}
+/* Thicker box borders (after columns 3 and 6) */
+.boxRight  { border-right: 2.5px solid var(--ink) !important; }
+.boxBottom { border-bottom: 2.5px solid var(--ink) !important; }
 
+/* Clue (given) digits: bold, ink color */
 .given {
-  font-weight: 700;
   color: var(--ink);
+  font-weight: 700;
 }
 
+/* Selected cell: yuzu-wash background + inset ring */
 .selected {
-  background: var(--yuzu) !important;
-  color: #fff;
+  background: var(--yuzu-wash) !important;
+  box-shadow: inset 0 0 0 2.5px var(--yuzu);
+  z-index: 1;
 }
 
-.peer {
-  background: var(--yuzu-wash);
+/* Selected + bad */
+.selBad {
+  box-shadow: inset 0 0 0 2.5px #D5573B !important;
 }
 
-.sameVal {
-  background: var(--yuzu-wash-2);
-}
+/* Peer cells (same row / col / box): very light tint — digits stay readable */
+.peer { background: var(--yuzu-wash-2); }
 
-.bad {
-  color: #d9483b !important;
-}
+/* Same digit as selected */
+.sameVal { background: var(--yuzu-wash); }
 
-/* Notes grid inside cell */
+/* Conflict: red digit */
+.bad { color: #D5573B !important; }
+
+/* Notes grid inside empty cell */
 .noteGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   width: 100%;
   height: 100%;
   padding: 1px;
 }
 
 .noteGrid small {
-  font-size: clamp(0.4rem, 1vw, 0.55rem);
+  font-size: calc(var(--sc) * 0.26);
   font-family: var(--kaku);
-  color: var(--ink-soft);
+  color: var(--ink-faint);
+  display: grid;
+  place-items: center;
+  font-weight: 500;
+}
+
+/* Action row: Erase / Notes / Undo */
+.actions {
+  display: flex;
+  gap: 9px;
+  width: calc(9 * var(--sc) + 8 * 7px);
+  margin-top: 9px;
+}
+
+.act {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 500;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.84rem;
+  font-family: var(--kaku);
+  color: var(--ink-soft);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 11px 8px;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.act:hover { border-color: var(--yuzu); color: var(--yuzu-deep); }
+
+.actOn {
+  border-color: var(--yuzu);
+  color: var(--yuzu-deep);
+  background: var(--yuzu-wash);
+  box-shadow: inset 0 0 0 1px var(--yuzu);
+}
+
+.actIcon { font-size: 0.95rem; }
+
+.noteState {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--yuzu-deep);
+  letter-spacing: .04em;
+  min-width: 1.5ch;
 }
 
 /* Win overlay */
@@ -124,10 +160,18 @@
   position: fixed;
   inset: 0;
   background: rgba(36, 30, 24, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .winCard {
@@ -138,26 +182,44 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-align: center;
+  animation: pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.winGlyph {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background: var(--yuzu-wash-2);
+  border-radius: 14px;
+  margin-bottom: 4px;
 }
 
 .winTitle {
   font-family: var(--maru);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--ink);
+  margin: 0;
 }
 
 .winTime {
   font-family: var(--maru);
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  color: var(--yuzu);
+  color: var(--yuzu-deep);
+  font-variant-numeric: tabular-nums;
 }
 
 .winSub {
   font-family: var(--kaku);
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
