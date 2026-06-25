@@ -1,0 +1,42 @@
+.pad {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 12px 0;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.digit {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--maru);
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.digit:hover:not(:disabled) {
+  background: var(--yuzu-wash);
+  border-color: var(--yuzu);
+}
+
+.digit:active:not(:disabled) {
+  background: var(--yuzu-wash-2);
+}
+
+.digit:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.erase {
+  font-size: 1.1rem;
+  background: transparent;
+  border-color: var(--line);
+}
