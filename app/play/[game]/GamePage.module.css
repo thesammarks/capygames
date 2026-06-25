@@ -1,0 +1,65 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo {
+  width: 26px;
+  height: auto;
+  filter: drop-shadow(0 1px 3px rgba(217,112,26,.25));
+  flex: none;
+}
+
+.wordmark {
+  font-family: var(--maru);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+
+.wordmark span {
+  color: var(--yuzu-deep);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.meta {
+  font-family: var(--kaku);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+.clock {
+  font-family: var(--kaku);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  min-width: 3ch;
+  text-align: right;
+}

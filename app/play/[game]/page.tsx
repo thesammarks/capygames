@@ -74,6 +74,7 @@ export default async function PlayPage({ params }: Props) {
       game={game}
       gameName={gameMeta.name}
       gameJp={gameMeta.jp}
+      glyph={gameMeta.glyph}
       rule={RULES[game] ?? ""}
       puzzleId={puzzle.id}
       puzzleData={puzzle.data as Record<string, unknown>}
