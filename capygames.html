@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Capygames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F3EE; --card:#FFFFFF; --ink:#241E18; --ink-soft:#6E665B; --ink-faint:#A39B8D;
+    --line:#E7E2D8; --line-2:#D8D2C5;
+    --yuzu:#F2922B; --yuzu-deep:#D9701A; --yuzu-wash:#FCEBD6; --yuzu-wash-2:#FBF3E6;
+    --radius:18px; --radius-sm:12px;
+    --shadow:0 1px 2px rgba(36,30,24,.04), 0 10px 34px rgba(36,30,24,.07);
+    --shadow-sm:0 1px 2px rgba(36,30,24,.05);
+    --maru:"Zen Maru Gothic",system-ui,sans-serif;
+    --kaku:"Zen Kaku Gothic New",system-ui,sans-serif;
+    --cell:30px; --gutter:104px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper); color:var(--ink); font-family:var(--kaku);
+    -webkit-font-smoothing:antialiased; min-height:100vh}
+  .col{max-width:660px; margin:0 auto; padding:0 18px}
+  .kana{font-family:var(--maru)}
+  button{font-family:inherit}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0 14px; position:sticky; top:0; background:var(--paper); z-index:20}
+  .brand{display:flex; align-items:center; gap:11px; cursor:pointer; background:none; border:none; padding:0}
+  .seal{width:38px; height:38px; flex:none; filter:drop-shadow(0 2px 4px rgba(217,112,26,.22))}
+  .wordmark{font-family:var(--maru); font-weight:700; font-size:21px; letter-spacing:-.01em; color:var(--ink)}
+  .wordmark .g{color:var(--yuzu-deep)}
+  .topright{display:flex; align-items:center; gap:10px}
+  .pill{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--ink-soft);
+    background:var(--card); border:1px solid var(--line); border-radius:999px; padding:7px 12px}
+  .pill b{color:var(--yuzu-deep); font-weight:700; font-variant-numeric:tabular-nums}
+  .signin{font-family:var(--kaku); font-weight:700; font-size:13.5px; color:var(--card); background:var(--ink);
+    border:none; border-radius:999px; padding:9px 16px; cursor:pointer}
+  .signin:hover{background:#000}
+  .signin:focus-visible,.brand:focus-visible{outline:2px solid var(--yuzu); outline-offset:3px}
+
+  /* ---------- home ---------- */
+  .hero{padding:22px 2px 22px}
+  .eyebrow{font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--yuzu-deep); font-weight:700}
+  .hero h1{font-family:var(--maru); font-weight:700; font-size:30px; line-height:1.18; letter-spacing:-.02em; margin:9px 0 0}
+  .hero p{color:var(--ink-soft); font-size:15px; margin:9px 0 0; max-width:42ch}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+
+  .tile{position:relative; text-align:left; background:var(--card); border:1px solid var(--line);
+    border-radius:var(--radius); padding:18px 18px 16px; cursor:pointer; box-shadow:var(--shadow-sm);
+    transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease; overflow:hidden}
+  .tile::after{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--yuzu);
+    transform:scaleY(0); transform-origin:top; transition:transform .18s ease}
+  .tile:hover{transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--line-2)}
+  .tile:hover::after{transform:scaleY(1)}
+  .tile:focus-visible{outline:2px solid var(--yuzu); outline-offset:2px}
+  .tile.soon{cursor:pointer}
+  .tile-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px}
+  .glyph{width:54px; height:54px; border-radius:12px; background:var(--yuzu-wash-2);
+    display:grid; place-items:center; flex:none}
+  .soonpill{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:4px 9px}
+  .strkpill{font-size:12px; font-weight:700; color:var(--yuzu-deep); background:var(--yuzu-wash);
+    border:1px solid var(--yuzu-wash); border-radius:999px; padding:4px 10px; font-variant-numeric:tabular-nums}
+  .tname{font-family:var(--maru); font-weight:700; font-size:18px; letter-spacing:-.01em; display:flex; align-items:baseline; gap:8px}
+  .tname .jp{font-family:var(--maru); font-weight:500; font-size:12px; color:var(--ink-faint); letter-spacing:.04em}
+  .tdesc{font-size:13px; color:var(--ink-soft); margin:5px 0 14px; line-height:1.45}
+  .status{display:flex; align-items:center; gap:7px; font-size:13px; font-weight:500; color:var(--ink-soft);
+    padding-top:12px; border-top:1px solid var(--line)}
+  .dotmark{width:14px; height:14px; border-radius:50%; border:2px solid var(--line-2); flex:none}
+  .status.prog .dotmark{border-color:var(--yuzu); background:
+    conic-gradient(var(--yuzu) 0 50%, transparent 0 100%)}
+  .status.done{color:var(--yuzu-deep); font-weight:700}
+  .status.done .dotmark{border:none; background:var(--yuzu);
+    -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>") center/13px no-repeat;
+    mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>") center/13px no-repeat}
+  .status .play{margin-left:auto; font-weight:700; color:var(--yuzu-deep)}
+
+  /* ---------- strip: streak + social ---------- */
+  .strip{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; align-items:start}
+  @media(max-width:560px){.strip{grid-template-columns:1fr}}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow-sm)}
+  .panel h3{font-family:var(--maru); font-size:13px; font-weight:700; margin:0 0 12px; color:var(--ink-soft); letter-spacing:.02em}
+  .week{display:flex; gap:7px}
+  .day{flex:1; text-align:center}
+  .day .d{font-size:10px; color:var(--ink-faint); margin-bottom:5px}
+  .day .o{height:26px; border-radius:7px; background:var(--paper); border:1px solid var(--line)}
+  .day.hit .o{background:var(--yuzu); border-color:var(--yuzu)}
+  .day.today .o{box-shadow:inset 0 0 0 2px var(--yuzu-deep)}
+  .social{display:flex; flex-direction:column; gap:10px}
+  .friend{display:flex; align-items:center; gap:10px; font-size:13.5px}
+  .ava{width:26px; height:26px; border-radius:50%; background:var(--yuzu-wash); display:grid; place-items:center;
+    font-family:var(--maru); font-size:12px; font-weight:700; color:var(--yuzu-deep); flex:none}
+  .friend .nm{font-weight:500} .friend .sc{margin-left:auto; color:var(--ink-faint); font-size:12px; font-variant-numeric:tabular-nums}
+  .locktag{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-faint); margin-top:2px}
+
+  footer{text-align:center; color:var(--ink-faint); font-size:12px; padding:34px 0 26px}
+
+  /* ---------- game view ---------- */
+  .view{display:none} .view.on{display:block}
+  .gamebar{display:flex; align-items:center; gap:12px; padding:14px 0}
+  .pmeta{font-size:12.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums; padding:0 2px 10px; letter-spacing:.01em}
+  .pmeta b{color:var(--yuzu-deep); font-weight:700}
+  .back{display:flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:var(--ink-soft);
+    background:var(--card); border:1px solid var(--line); border-radius:999px; padding:8px 14px 8px 11px; cursor:pointer}
+  .back:hover{color:var(--ink)} .back:focus-visible{outline:2px solid var(--yuzu); outline-offset:2px}
+  .gtitle{font-family:var(--maru); font-weight:700; font-size:18px}
+  .gtitle .jp{font-size:12px; color:var(--ink-faint); font-weight:500; margin-left:7px}
+  .gclock{margin-left:auto; font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink-soft); font-size:15px}
+
+  .board{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:14px; display:grid; grid-template-columns:var(--gutter) 1fr; grid-template-rows:var(--gutter) 1fr; justify-content:center}
+  .corner{grid-area:1/1} .colclues{grid-area:1/2; display:flex} .rowclues{grid-area:2/1; display:flex; flex-direction:column}
+  .gridwrap{grid-area:2/2}
+  .ccol{width:var(--cell); display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:1px;
+    padding-bottom:5px; font-weight:500; font-size:calc(var(--cell)*.42); color:var(--ink-soft); line-height:1.05; font-variant-numeric:tabular-nums}
+  .crow{height:var(--cell); display:flex; justify-content:flex-end; align-items:center; gap:6px; padding-right:8px;
+    font-weight:500; font-size:calc(var(--cell)*.42); color:var(--ink-soft); font-variant-numeric:tabular-nums}
+  .ccol.done,.crow.done{color:var(--line-2); opacity:.6}
+  .ccol.hot,.crow.hot{color:var(--yuzu-deep)}
+  .grid{display:grid; touch-action:none; user-select:none; -webkit-user-select:none;
+    border-top:2px solid var(--line-2); border-left:2px solid var(--line-2)}
+  .cell{width:var(--cell); height:var(--cell); border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+    position:relative; cursor:pointer; background:var(--card)}
+  .cell.bx{border-right-color:var(--line-2)} .cell.by{border-bottom-color:var(--line-2)}
+  .cell.fill{background:var(--ink)} .cell.hot{background:var(--yuzu-wash)} .cell.fill.hot{background:var(--yuzu)}
+  .cell.mark::before,.cell.mark::after{content:""; position:absolute; left:24%; right:24%; top:48%; height:2px; background:var(--ink-faint); border-radius:2px}
+  .cell.mark::before{transform:rotate(45deg)} .cell.mark::after{transform:rotate(-45deg)}
+  .grid.solved .cell{transition:background .04s linear; transition-delay:calc(var(--d)*13ms)}
+  .grid.solved .cell.fill{background:var(--yuzu)}
+
+  .tools{display:flex; gap:9px; margin-top:15px}
+  .tool{flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:600; font-size:14px;
+    color:var(--ink-soft); background:var(--card); border:1px solid var(--line); border-radius:11px; padding:12px; cursor:pointer; transition:.12s}
+  .tool.on{border-color:var(--yuzu); color:var(--yuzu-deep); background:var(--yuzu-wash); box-shadow:inset 0 0 0 1px var(--yuzu)}
+  .tool:focus-visible,.toolx:focus-visible{outline:2px solid var(--yuzu); outline-offset:2px}
+  .toolx{font-weight:600; font-size:14px; color:var(--ink-soft); background:var(--card); border:1px solid var(--line); border-radius:11px; padding:12px 16px; cursor:pointer}
+
+  .win{margin-top:15px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:20px; text-align:center; display:none}
+  .win.show{display:block; animation:rise .4s ease}
+  @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1}}
+  .win .seal-sm{width:46px; height:46px; margin:0 auto 8px; display:block}
+  .win h2{font-family:var(--maru); margin:0 0 2px; font-size:21px}
+  .win .pic{font-size:13.5px; color:var(--ink-soft); margin-bottom:16px}
+  .win .stats{display:flex; justify-content:center; gap:30px; margin-bottom:18px}
+  .win .n{font-family:var(--maru); font-weight:700; font-size:23px} .win .l{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; margin-top:2px}
+  .share{font-family:var(--maru); font-weight:700; font-size:15px; color:#fff; background:var(--yuzu); border:none; border-radius:11px; padding:13px 24px; cursor:pointer; transition:.12s}
+  .share:hover{background:var(--yuzu-deep)} .share:active{transform:scale(.98)}
+  .share:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+
+  /* ---------- toast ---------- */
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px); opacity:0;
+    background:var(--ink); color:#fff; font-size:14px; font-weight:500; padding:12px 18px; border-radius:12px;
+    box-shadow:var(--shadow); transition:.25s; pointer-events:none; z-index:60; max-width:90vw; text-align:center}
+  .toast.show{transform:translateX(-50%) translateY(0); opacity:1}
+
+  /* ---------- sudoku ---------- */
+  .sboard{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:12px; display:flex; justify-content:center}
+  .sgrid{--sc:min(40px, calc((100vw - 80px)/9)); display:grid; grid-template-columns:repeat(9,var(--sc));
+    border:2.5px solid var(--ink); border-radius:5px; overflow:hidden; touch-action:manipulation}
+  .scell{width:var(--sc); height:var(--sc); display:grid; place-items:center; cursor:pointer; position:relative;
+    border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--card);
+    font-family:var(--maru); font-weight:500; font-size:calc(var(--sc)*.52); color:var(--yuzu-deep);
+    font-variant-numeric:tabular-nums; transition:background .08s}
+  .scell.given{color:var(--ink); font-weight:700}
+  .scell.r2{border-right:2.5px solid var(--ink)} .scell.b2{border-bottom:2.5px solid var(--ink)}
+  .scell.c8{border-right:none}
+  .scell.peer{background:var(--yuzu-wash-2)}
+  .scell.same{background:var(--yuzu-wash)}
+  .scell.sel{background:var(--yuzu-wash); box-shadow:inset 0 0 0 2.5px var(--yuzu)}
+  .scell.bad{color:#D5573B} .scell.sel.bad{box-shadow:inset 0 0 0 2.5px #D5573B}
+  .notes{position:absolute; inset:0; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+    font-family:var(--kaku); font-weight:500; font-size:calc(var(--sc)*.26); color:var(--ink-faint); padding:1px}
+  .notes span{display:grid; place-items:center}
+
+  .spad{display:grid; grid-template-columns:repeat(9,1fr); gap:7px; margin-top:14px}
+  @media(max-width:480px){.spad{grid-template-columns:repeat(9,1fr); gap:5px}}
+  .num{aspect-ratio:1/1.15; display:grid; place-items:center; font-family:var(--maru); font-weight:700;
+    font-size:clamp(17px,5vw,22px); color:var(--ink); background:var(--card); border:1px solid var(--line);
+    border-radius:10px; cursor:pointer; transition:.1s; font-variant-numeric:tabular-nums}
+  .num:hover{border-color:var(--yuzu); color:var(--yuzu-deep)} .num:active{background:var(--yuzu-wash)}
+  .num.dim{color:var(--ink-faint); opacity:.4; pointer-events:none}
+  .num:focus-visible{outline:2px solid var(--yuzu); outline-offset:2px}
+
+  .sactions{display:flex; gap:9px; margin-top:9px}
+  .sact{flex:1; display:flex; align-items:center; justify-content:center; gap:7px; font-weight:600; font-size:13.5px;
+    color:var(--ink-soft); background:var(--card); border:1px solid var(--line); border-radius:11px; padding:11px; cursor:pointer; transition:.12s}
+  .sact .ic{font-size:15px} .sact:focus-visible{outline:2px solid var(--yuzu); outline-offset:2px}
+  .sact.on{border-color:var(--yuzu); color:var(--yuzu-deep); background:var(--yuzu-wash); box-shadow:inset 0 0 0 1px var(--yuzu)}
+  .notestate{font-size:11px; color:var(--ink-faint); font-weight:700; text-transform:uppercase}
+  .sact.on .notestate{color:var(--yuzu-deep)}
+
+  /* ---------- per-game streaks panel ---------- */
+  .streaks{display:flex; flex-direction:column; gap:11px}
+  .srow{display:flex; align-items:center; gap:10px; font-size:13.5px}
+  .srow .sg{width:24px; height:24px; flex:none; display:grid; place-items:center}
+  .srow .snm{font-weight:600} .srow .smeta{margin-left:auto; display:flex; gap:12px; align-items:center; color:var(--ink-faint); font-size:12px; font-variant-numeric:tabular-nums}
+  .srow .fl{color:var(--yuzu-deep); font-weight:700}
+  .srow .fl.zero{color:var(--ink-faint); font-weight:500}
+
+  .friend.rank{position:relative} .friend .pos{width:16px; font-family:var(--maru); font-weight:700; font-size:12px; color:var(--ink-faint); text-align:center}
+
+  /* ---------- acknowledgement overlay ---------- */
+  .scrim{position:fixed; inset:0; background:rgba(36,30,24,.42); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center; padding:20px; z-index:50}
+  .scrim.show{display:flex; animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .ackcard{background:var(--card); border-radius:22px; box-shadow:0 24px 70px rgba(36,30,24,.28);
+    width:100%; max-width:380px; padding:30px 26px 24px; text-align:center; animation:pop .26s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes pop{from{opacity:0; transform:translateY(14px) scale(.97)}to{opacity:1; transform:none}}
+  .ackglyph{width:62px; height:62px; display:grid; place-items:center; margin:0 auto 14px;
+    background:var(--yuzu-wash-2); border-radius:16px}
+  .acktitle{font-family:var(--maru); font-weight:700; font-size:24px; letter-spacing:-.01em}
+  .acktitle .jp{font-size:13px; color:var(--ink-faint); font-weight:500; margin-left:8px}
+  .ackdate{font-size:12.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--yuzu-deep); font-weight:700; margin-top:7px}
+  .ackrule{font-size:13.5px; color:var(--ink-soft); line-height:1.5; margin:13px auto 4px; max-width:30ch}
+  .ackstats{display:flex; justify-content:center; gap:14px; margin:18px 0 20px}
+  .ackstats > div{flex:1; background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:11px 6px}
+  .ackstats .n{font-family:var(--maru); font-weight:700; font-size:19px; font-variant-numeric:tabular-nums}
+  .ackstats .l{font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; margin-top:3px}
+  .ackplay{width:100%; font-family:var(--maru); font-weight:700; font-size:16px; color:#fff; background:var(--ink);
+    border:none; border-radius:13px; padding:15px; cursor:pointer; transition:.12s}
+  .ackplay:hover{background:#000} .ackplay:active{transform:scale(.99)}
+  .ackplay:focus-visible{outline:2px solid var(--yuzu); outline-offset:2px}
+  .ackclose{margin-top:11px; background:none; border:none; color:var(--ink-faint); font-family:var(--kaku);
+    font-weight:600; font-size:13px; cursor:pointer; padding:4px}
+  .ackclose:hover{color:var(--ink-soft)}
+
+  /* ---------- bridges ---------- */
+  .bboard{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:16px; display:flex; justify-content:center}
+  #bsvg{width:min(100%,430px); height:auto; touch-action:none; user-select:none; -webkit-user-select:none}
+  .isle{fill:var(--card); stroke:var(--ink); stroke-width:2}
+  .isle.done{fill:var(--yuzu-wash); stroke:var(--yuzu)}
+  .isle.over{fill:#FBE7E1; stroke:#D5573B}
+  .islabel{font-family:var(--maru); font-weight:700; fill:var(--ink); text-anchor:middle; dominant-baseline:central}
+  .isle.done ~ .islabel,.ilab.done{fill:var(--yuzu-deep)} .ilab.over{fill:#D5573B}
+  .brg{stroke:var(--ink-soft); stroke-width:2.4; stroke-linecap:round}
+  .brg-prev{stroke:var(--yuzu); stroke-width:3; stroke-dasharray:5 5; stroke-linecap:round; opacity:.8}
+  .ihit{fill:transparent; cursor:pointer}
+
+  /* ---------- kakuro ---------- */
+  .kboard{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:14px; display:flex; justify-content:center}
+  .kgrid{--kc:min(48px, calc((100vw - 78px)/var(--kn,5))); display:grid; border:2px solid var(--ink); border-radius:4px; overflow:hidden}
+  .kcell{width:var(--kc); height:var(--kc); position:relative; border-right:1px solid var(--line-2); border-bottom:1px solid var(--line-2)}
+  .kcell.block{background:var(--ink)}
+  .kcell.white{background:var(--card); cursor:pointer; display:grid; place-items:center;
+    font-family:var(--maru); font-weight:600; font-size:calc(var(--kc)*.5); color:var(--yuzu-deep); font-variant-numeric:tabular-nums}
+  .kcell.white.sel{background:var(--yuzu-wash); box-shadow:inset 0 0 0 2.5px var(--yuzu)}
+  .kcell.white.peer{background:var(--yuzu-wash-2)}
+  .kcell.white.bad{color:#D5573B}
+  .kclue{position:absolute; inset:0; pointer-events:none}
+  .kclue .dn{position:absolute; left:7%; bottom:5%; font-size:calc(var(--kc)*.27); color:#EDE7DA; font-weight:700; font-family:var(--kaku)}
+  .kclue .ac{position:absolute; right:6%; top:5%; font-size:calc(var(--kc)*.27); color:#EDE7DA; font-weight:700; font-family:var(--kaku)}
+  .kslash{position:absolute; inset:0}
+
+  @media (prefers-reduced-motion:reduce){
+    .tile,.tile::after,.toast{transition:none} .grid.solved .cell{transition:none} .win.show{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= HOME ================= -->
+<div class="view on" id="home">
+  <div class="col">
+    <div class="topbar">
+      <button class="brand" onclick="go('home')">
+        <span class="seal" id="sealHome"></span>
+        <span class="wordmark">Capy<span class="g">games</span></span>
+      </button>
+      <div class="topright">
+        <span class="pill" id="hToday">0/4 today</span>
+        <button class="signin" onclick="toast('Accounts come with the backend — see the build notes.')">Sign in</button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="eyebrow" id="hDate">TODAY</div>
+      <h1>Four puzzles.<br>One a day.</h1>
+      <p>A new set of Japanese logic puzzles every day. Build a streak in each, race the clock, and see where you land against your friends.</p>
+    </div>
+
+    <div class="grid2" id="tiles"></div>
+
+    <div class="strip">
+      <div class="panel">
+        <h3>Your streaks</h3>
+        <div class="streaks" id="streaks"></div>
+      </div>
+      <div class="panel">
+        <h3>Friends · today's Sudoku</h3>
+        <div class="social">
+          <div class="friend"><span class="ava">Y</span><span class="nm">You</span><span class="sc">— · solve to rank</span></div>
+          <div class="friend rank"><span class="pos">1</span><span class="ava">R</span><span class="nm">Rin</span><span class="sc">4:12</span></div>
+          <div class="friend rank"><span class="pos">2</span><span class="ava">K</span><span class="nm">Kenji</span><span class="sc">5:38</span></div>
+          <div class="locktag">🔒 Friends &amp; per-game leaderboards — needs sign-in</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Capygames · a fresh set every day at midnight 🦫</footer>
+  </div>
+</div>
+
+<!-- ================= NONOGRAM ================= -->
+<div class="view" id="game">
+  <div class="col">
+    <div class="gamebar">
+      <button class="back" onclick="go('home')">‹ Hub</button>
+      <span class="gtitle"><span id="ngTitleName">Nonogram</span><span class="jp kana" id="ngTitleJp">ノノグラム</span></span>
+      <span class="gclock" id="clock">0:00</span>
+    </div>
+    <div class="pmeta" id="ngMeta"></div>
+
+    <div class="board" id="board">
+      <div class="corner"></div>
+      <div class="colclues" id="colclues"></div>
+      <div class="rowclues" id="rowclues"></div>
+      <div class="gridwrap"><div class="grid" id="grid"></div></div>
+    </div>
+
+    <div class="tools">
+      <button class="tool on" id="tFill">▣ Fill</button>
+      <button class="tool" id="tMark">✕ Mark</button>
+      <button class="toolx" id="reset">Reset</button>
+    </div>
+
+    <div class="win" id="winBox">
+      <span class="seal-sm" id="sealWin"></span>
+      <h2>Solved!</h2>
+      <div class="pic" id="winpic"></div>
+      <div class="stats">
+        <div><div class="n" id="wtime">0:00</div><div class="l">Time</div></div>
+        <div><div class="n" id="wstreak">1</div><div class="l">Streak</div></div>
+      </div>
+      <button class="share" id="share">Share result</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SUDOKU ================= -->
+<div class="view" id="sudoku">
+  <div class="col">
+    <div class="gamebar">
+      <button class="back" onclick="go('home')">‹ Hub</button>
+      <span class="gtitle">Sudoku<span class="jp kana">数独</span></span>
+      <span class="gclock" id="sclock">0:00</span>
+    </div>
+    <div class="pmeta" id="suMeta"></div>
+    <div class="sboard"><div class="sgrid" id="sgrid"></div></div>
+    <div class="spad" id="spad"></div>
+    <div class="sactions">
+      <button class="sact" id="sNotes"><span class="ic">✎</span> Notes <span class="notestate" id="notestate">off</span></button>
+      <button class="sact" id="sErase"><span class="ic">⌫</span> Erase</button>
+      <button class="sact" id="sUndo"><span class="ic">↩</span> Undo</button>
+    </div>
+    <div class="win" id="swinBox">
+      <span class="seal-sm" id="sealWin2"></span>
+      <h2>Solved!</h2>
+      <div class="pic">A clean grid — every row, column and box complete.</div>
+      <div class="stats">
+        <div><div class="n" id="swtime">0:00</div><div class="l">Time</div></div>
+        <div><div class="n" id="swstreak">1</div><div class="l">Streak</div></div>
+      </div>
+      <button class="share" id="sshare">Share result</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= BRIDGES ================= -->
+<div class="view" id="bridges">
+  <div class="col">
+    <div class="gamebar">
+      <button class="back" onclick="go('home')">‹ Hub</button>
+      <span class="gtitle">Bridges<span class="jp kana">橋をかけろ</span></span>
+      <span class="gclock" id="bclock">0:00</span>
+    </div>
+    <div class="pmeta" id="bMeta"></div>
+    <div class="bboard"><svg id="bsvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="tools"><button class="toolx" id="bReset" style="flex:1">Reset</button></div>
+    <div class="win" id="bwinBox">
+      <span class="seal-sm" id="sealWin3"></span>
+      <h2>Solved!</h2>
+      <div class="pic">Every island connected, every count matched.</div>
+      <div class="stats">
+        <div><div class="n" id="bwtime">0:00</div><div class="l">Time</div></div>
+        <div><div class="n" id="bwstreak">1</div><div class="l">Streak</div></div>
+      </div>
+      <button class="share" id="bshare">Share result</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= KAKURO ================= -->
+<div class="view" id="kakuro">
+  <div class="col">
+    <div class="gamebar">
+      <button class="back" onclick="go('home')">‹ Hub</button>
+      <span class="gtitle">Kakuro<span class="jp kana">カックロ</span></span>
+      <span class="gclock" id="kclock">0:00</span>
+    </div>
+    <div class="pmeta" id="kMeta"></div>
+    <div class="kboard"><div class="kgrid" id="kgrid"></div></div>
+    <div class="spad" id="kpad"></div>
+    <div class="sactions">
+      <button class="sact" id="kErase"><span class="ic">⌫</span> Erase</button>
+      <button class="sact" id="kCheck"><span class="ic">✓</span> Check</button>
+    </div>
+    <div class="win" id="kwinBox">
+      <span class="seal-sm" id="sealWin4"></span>
+      <h2>Solved!</h2>
+      <div class="pic">Every run adds up. Clean sheet.</div>
+      <div class="stats">
+        <div><div class="n" id="kwtime">0:00</div><div class="l">Time</div></div>
+        <div><div class="n" id="kwstreak">1</div><div class="l">Streak</div></div>
+      </div>
+      <button class="share" id="kshare">Share result</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= START / ACK OVERLAY ================= -->
+<div class="scrim" id="ack">
+  <div class="ackcard">
+    <span class="ackglyph" id="ackGlyph"></span>
+    <div class="acktitle" id="ackTitle">Game<span class="jp kana" id="ackJp"></span></div>
+    <div class="ackdate" id="ackDate">Daily</div>
+    <p class="ackrule" id="ackRule"></p>
+    <div class="ackstats">
+      <div><div class="n" id="ackStreak">0</div><div class="l">Streak</div></div>
+      <div><div class="n" id="ackBest">—</div><div class="l">Best</div></div>
+      <div><div class="n" id="ackRank">—</div><div class="l">vs friends</div></div>
+    </div>
+    <button class="ackplay" id="ackPlay">Play</button>
+    <button class="ackclose" id="ackClose">Back to hub</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- capybara seal ---------- */
+const SEAL=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+  <rect x="6" y="6" width="88" height="88" rx="26" fill="#F2922B"/>
+  <circle cx="29" cy="32" r="6.5" fill="#fff"/><circle cx="71" cy="32" r="6.5" fill="#fff"/>
+  <rect x="19" y="29" width="62" height="52" rx="19" fill="#fff"/>
+  <circle cx="37" cy="45" r="3.4" fill="#2A1F14"/><circle cx="63" cy="45" r="3.4" fill="#2A1F14"/>
+  <rect x="30" y="55" width="40" height="24" rx="13" fill="#FCE2BE"/>
+  <rect x="43" y="59" width="14" height="7" rx="3.5" fill="#2A1F14"/></svg>`;
+document.getElementById("sealHome").innerHTML=SEAL;
+document.getElementById("sealWin").innerHTML=SEAL;
+
+/* ---------- storage (survives sandbox) ---------- */
+const store=(()=>{let mem={},ok=false;try{localStorage.setItem("__t","1");localStorage.removeItem("__t");ok=true}catch(e){}
+  return{get:k=>{try{return ok?localStorage.getItem(k):mem[k]}catch(e){return mem[k]}},
+         set:(k,v)=>{try{ok?localStorage.setItem(k,v):mem[k]=v}catch(e){mem[k]=v}}}})();
+
+/* ---------- date / daily ---------- */
+const EPOCH=Date.UTC(2025,0,1)/86400000|0, today=Date.now()/86400000|0, dayNum=today-EPOCH+1;
+const dateObj=new Date();
+const pmShort=dateObj.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+function pmeta(size){return `<b>Daily #${dayNum}</b> · ${pmShort}${size?(" · "+size):""}`;}
+document.getElementById("hDate").textContent=
+  dateObj.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}).toUpperCase()+"  ·  DAILY #"+dayNum;
+
+/* ---------- game registry ---------- */
+const GAMES=[
+  {id:"nonogram",name:"Nonogram",jp:"ノノグラム",desc:"Use the number clues to uncover a hidden picture.",live:true,
+   glyph:`<svg width="34" height="34" viewBox="0 0 34 34"><g fill="#241E18">
+     <rect x="6" y="2" width="6" height="6" rx="1"/><rect x="22" y="2" width="6" height="6" rx="1"/>
+     <rect x="2" y="10" width="30" height="6" rx="1"/><rect x="2" y="18" width="30" height="6" rx="1"/>
+     <rect x="9" y="26" width="16" height="6" rx="1"/></g></svg>`},
+  {id:"nonomini",name:"Nonogram Mini",jp:"ミニ",desc:"A bite-size 5×5 nonogram — same idea, quicker solve.",live:true,
+   glyph:`<svg width="34" height="34" viewBox="0 0 34 34"><g fill="#241E18">
+     <rect x="9" y="6" width="7" height="7" rx="1.4"/><rect x="6" y="15" width="16" height="7" rx="1.4"/>
+     <rect x="11" y="24" width="9" height="7" rx="1.4"/></g></svg>`},
+  {id:"sudoku",name:"Sudoku",jp:"数独",desc:"Fill the grid so every row, column and box holds 1–9.",live:true,
+   glyph:`<svg width="34" height="34" viewBox="0 0 34 34" font-family="Zen Kaku Gothic New" font-weight="700" font-size="11" fill="#241E18">
+     <rect x="1.5" y="1.5" width="31" height="31" rx="3" fill="none" stroke="#241E18" stroke-width="1.6"/>
+     <line x1="12" y1="2" x2="12" y2="32" stroke="#D8D2C5"/><line x1="22.5" y1="2" x2="22.5" y2="32" stroke="#D8D2C5"/>
+     <line x1="2" y1="12" x2="32" y2="12" stroke="#D8D2C5"/><line x1="2" y1="22.5" x2="32" y2="22.5" stroke="#D8D2C5"/>
+     <text x="6" y="10">5</text><text x="27" y="20.5">3</text><text x="16" y="30">8</text></svg>`},
+  {id:"bridges",name:"Bridges",jp:"橋をかけろ",desc:"Connect the islands so the bridge counts all match.",live:true,
+   glyph:`<svg width="34" height="34" viewBox="0 0 34 34"><g stroke="#F2922B" stroke-width="2"><line x1="7" y1="7" x2="7" y2="27"/><line x1="7" y1="9" x2="27" y2="9"/><line x1="9" y1="11" x2="25" y2="11"/></g>
+     <g fill="#241E18"><circle cx="7" cy="7" r="4.4"/><circle cx="27" cy="7" r="4.4"/><circle cx="7" cy="27" r="4.4"/></g></svg>`},
+  {id:"kakuro",name:"Kakuro",jp:"カックロ",desc:"A number crossword — entries add up to the clues.",live:true,
+   glyph:`<svg width="34" height="34" viewBox="0 0 34 34" font-family="Zen Kaku Gothic New" font-weight="700" font-size="8" fill="#fff">
+     <rect x="2" y="2" width="14" height="14" fill="#241E18"/><line x1="2" y1="2" x2="16" y2="16" stroke="#6E665B"/>
+     <text x="9.5" y="13">16</text><text x="4" y="8">\\</text>
+     <rect x="18" y="2" width="14" height="14" rx="2" fill="none" stroke="#D8D2C5" stroke-width="1.4"/>
+     <rect x="2" y="18" width="14" height="14" rx="2" fill="none" stroke="#D8D2C5" stroke-width="1.4"/>
+     <rect x="18" y="18" width="14" height="14" rx="2" fill="none" stroke="#D8D2C5" stroke-width="1.4"/></svg>`},
+];
+const state={}; GAMES.forEach(g=>state[g.id]={status:"new",time:null});
+
+/* ---------- per-game stats — each puzzle keeps its own streak / best time ---------- */
+const RULES={
+  nonogram:"Fill cells to match the row and column clues. Each number is the length of a run of filled squares, in order.",
+  nonomini:"A bite-size 5×5 nonogram. The clues give the run lengths, in order — same rules, quicker solve.",
+  sudoku:"Fill every row, column and 3×3 box with the digits 1–9, with no repeats.",
+  bridges:"Join the islands with bridges. Each island needs exactly its number of bridges; at most two between a pair, none crossing, and all islands connected.",
+  kakuro:"Fill the white cells with 1–9 so each run adds up to its clue. No digit repeats within a run.",
+};
+function K(id,suf){return "cg_"+id+"_"+suf}
+function liveStreak(id){const last=+store.get(K(id,"lastDay"))||0,s=+store.get(K(id,"streak"))||0; return (last===today||last===today-1)?s:0;}
+function bestOf(id){return (+store.get(K(id,"best"))||0)||null;}
+function bumpStreak(id){let last=+store.get(K(id,"lastDay"))||0,s=+store.get(K(id,"streak"))||0;
+  if(last!==today){s=(last===today-1)?s+1:1; store.set(K(id,"streak"),s); store.set(K(id,"lastDay"),today);} return s;}
+function recordSolve(id,secs){
+  const s=bumpStreak(id);
+  const b=+store.get(K(id,"best"))||1e9; if(secs<b) store.set(K(id,"best"),secs);
+  store.set(K(id,"solveDay"),today); store.set(K(id,"solveTime"),secs);
+  state[id].status="done"; state[id].time=secs;
+  return s;
+}
+/* restore today's completed games on reload */
+GAMES.forEach(g=>{ if((+store.get(K(g.id,"solveDay"))||0)===today){state[g.id].status="done"; state[g.id].time=+store.get(K(g.id,"solveTime"))||0;} });
+
+/* ---------- render tiles ---------- */
+function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function renderTiles(){
+  const wrap=document.getElementById("tiles"); wrap.innerHTML="";
+  GAMES.forEach(g=>{
+    const st=state[g.id], strk=liveStreak(g.id);
+    let statusLabel, cls="";
+    if(st.status==="done"){cls="done"; statusLabel="Solved · "+fmt(st.time);}
+    else if(st.status==="progress"){cls="prog"; statusLabel="In progress";}
+    else{statusLabel = g.live? "Not started" : "New puzzle daily";}
+    const corner = g.live ? (strk>0?`<span class="strkpill">🔥 ${strk}</span>`:"") : '<span class="soonpill">Soon</span>';
+    const action = g.live ? (st.status==="done"?"Result ›":st.status==="progress"?"Continue ›":"Play ›") : "Preview ›";
+    const t=document.createElement("button");
+    t.className="tile"+(g.live?"":" soon"); t.onclick=()=>openGame(g.id);
+    t.innerHTML=`
+      <div class="tile-top"><div class="glyph">${g.glyph}</div>${corner}</div>
+      <div class="tname">${g.name}<span class="jp kana">${g.jp}</span></div>
+      <div class="tdesc">${g.desc}</div>
+      <div class="status ${cls}"><span class="dotmark"></span><span>${statusLabel}</span>
+        <span class="play">${action}</span></div>`;
+    wrap.appendChild(t);
+  });
+}
+function renderStreaks(){
+  const el=document.getElementById("streaks"); el.innerHTML="";
+  GAMES.forEach(g=>{
+    const strk=liveStreak(g.id), best=bestOf(g.id);
+    const mini=g.glyph.replace('width="34" height="34"','width="20" height="20"');
+    const row=document.createElement("div"); row.className="srow";
+    row.innerHTML=`<span class="sg">${mini}</span><span class="snm">${g.name}</span>
+      <span class="smeta"><span class="fl ${strk?'':'zero'}">🔥 ${strk}</span>
+      <span>${best?('best '+fmt(best)):(g.live?'—':'soon')}</span></span>`;
+    el.appendChild(row);
+  });
+}
+function refreshHub(){
+  const done=GAMES.filter(g=>state[g.id].status==="done").length;
+  document.getElementById("hToday").textContent=done+"/"+GAMES.length+" today";
+  renderStreaks();
+}
+
+/* ---------- view switching ---------- */
+function go(v){
+  ["home","game","sudoku","bridges","kakuro"].forEach(id=>{const el=document.getElementById(id); if(el)el.classList.toggle("on",id===v);});
+  window.scrollTo(0,0);
+  if(v==="home"){renderTiles(); refreshHub();}
+}
+
+/* ---------- acknowledgement / start screen (NYT-style) ---------- */
+let ackTarget=null;
+function openGame(id){
+  const g=GAMES.find(x=>x.id===id);
+  if(!g.live){toast(g.name+" is next on the build list — preview coming soon.");return;}
+  ackTarget=id;
+  document.getElementById("ackGlyph").innerHTML=g.glyph;
+  document.getElementById("ackTitle").firstChild.textContent=g.name;
+  document.getElementById("ackJp").textContent=g.jp;
+  document.getElementById("ackDate").textContent="Daily #"+dayNum;
+  document.getElementById("ackRule").textContent=RULES[id]||g.desc;
+  document.getElementById("ackStreak").textContent="🔥 "+liveStreak(id);
+  document.getElementById("ackBest").textContent=bestOf(id)?fmt(bestOf(id)):"—";
+  document.getElementById("ackRank").textContent="—";
+  document.getElementById("ackPlay").textContent=
+    state[id].status==="done"?"See result":state[id].status==="progress"?"Continue":"Play";
+  document.getElementById("ack").classList.add("show");
+}
+function hideAck(){document.getElementById("ack").classList.remove("show")}
+document.getElementById("ackClose").onclick=hideAck;
+document.getElementById("ack").addEventListener("pointerdown",e=>{if(e.target.id==="ack")hideAck()});
+document.getElementById("ackPlay").onclick=()=>{
+  hideAck();
+  if(ackTarget==="nonogram"||ackTarget==="nonomini"){go("game"); initNonogram(ackTarget);}
+  else if(ackTarget==="sudoku"){go("sudoku"); initSudoku();}
+  else if(ackTarget==="bridges"){go("bridges"); initBridges();}
+  else if(ackTarget==="kakuro"){go("kakuro"); initKakuro();}
+};
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2600);}
+
+/* ================= NONOGRAM (full + mini share one engine) ================= */
+const NONO_FULL=[
+ {name:"a heart",g:[".##....##.","####..####","##########","##########","##########",".########.","..######..","...####...","....##....",".........."]},
+ {name:"a space invader",g:["..........","..#....#..","...#..#...","..######..",".##.##.##.","##########","#.######.#","#.#....#.#","..#.##.#..",".........."]},
+ {name:"a mushroom",g:["...####...",".########.","##########","##.####.##","##########",".########.","...####...","...####...","..######..",".........."]},
+ {name:"a sailboat",g:["....#.....","....##....","....#.#...","....#..#..","....#...#.","..........",".########.","..######..","..........",".........."]},
+];
+const NONO_MINI=[
+ {name:"a heart",g:[".#.#.","#####","#####",".###.","..#.."]},
+ {name:"a diamond",g:["..#..",".###.","#####",".###.","..#.."]},
+ {name:"a cross",g:["..#..","..#..","#####","..#..","..#.."]},
+ {name:"an arrow",g:["..#..",".###.","#.#.#","..#..","..#.."]},
+ {name:"a checkmark",g:["....#","...#.","#.#..","##...",".#..."]},
+];
+function clueOf(line){const r=[];let c=0;for(const v of line){v?c++:(c&&(r.push(c),c=0))}c&&r.push(c);return r.length?r:[0]}
+
+let ng={N:0,grid:[],cells:[],tool:1,started:null,solved:false,rowEls:[],colEls:[],gameId:"nonogram",sol:[],rowClues:[],colClues:[],puzzleName:""};
+let nonoWired=false, clockT=null;
+
+function initNonogram(gameId){
+  const set = gameId==="nonomini"?NONO_MINI:NONO_FULL;
+  const pz = set[((today%set.length)+set.length)%set.length];
+  ng={N:pz.g.length,grid:[],cells:[],tool:1,started:null,solved:false,rowEls:[],colEls:[],gameId,
+      sol:pz.g.map(r=>[...r].map(c=>c==="#"?1:0)),puzzleName:pz.name,rowClues:[],colClues:[]};
+  ng.rowClues=ng.sol.map(clueOf);
+  ng.colClues=Array.from({length:ng.N},(_,x)=>clueOf(ng.sol.map(r=>r[x])));
+  document.getElementById("ngTitleName").textContent = gameId==="nonomini"?"Nonogram Mini":"Nonogram";
+  document.getElementById("ngTitleJp").textContent   = gameId==="nonomini"?"ミニ":"ノノグラム";
+  document.getElementById("ngMeta").innerHTML=pmeta(ng.N+"×"+ng.N);
+  document.getElementById("winBox").classList.remove("show");
+  document.getElementById("clock").textContent="0:00";
+  const grid=document.getElementById("grid"); grid.classList.remove("solved"); grid.innerHTML="";
+  grid.style.gridTemplateColumns=`repeat(${ng.N},var(--cell))`;
+  document.getElementById("colclues").innerHTML=""; document.getElementById("rowclues").innerHTML="";
+  for(let y=0;y<ng.N;y++){ng.cells[y]=[]; ng.grid[y]=Array(ng.N).fill(0);
+    for(let x=0;x<ng.N;x++){const d=document.createElement("div");
+      d.className="cell"+((x+1)%5===0?" bx":"")+((y+1)%5===0?" by":""); d.style.setProperty("--d",x+y);
+      d.dataset.x=x; d.dataset.y=y; grid.appendChild(d); ng.cells[y][x]=d;}}
+  const cw=document.getElementById("colclues"); ng.colClues.forEach(cl=>{const c=document.createElement("div");c.className="ccol";
+    cl.forEach(n=>{const s=document.createElement("span");s.textContent=n;c.appendChild(s)}); cw.appendChild(c); ng.colEls.push(c);});
+  const rw=document.getElementById("rowclues"); ng.rowClues.forEach(cl=>{const c=document.createElement("div");c.className="crow";
+    cl.forEach(n=>{const s=document.createElement("span");s.textContent=n;c.appendChild(s)}); rw.appendChild(c); ng.rowEls.push(c);});
+  if(!nonoWired){wireNonogram(); nonoWired=true;}
+  ngFit();
+}
+function ngFit(){
+  const cols=ng.N||10, cap=cols<=6?54:38, gm=cols<=6?2.6:3.4;
+  const avail=Math.min(document.querySelector("#game .col").clientWidth-28,500);
+  const cell=Math.max(22,Math.min(cap,Math.floor(avail/(cols+gm))));
+  document.documentElement.style.setProperty("--cell",cell+"px");
+  document.documentElement.style.setProperty("--gutter",Math.round(cell*gm)+"px");
+}
+addEventListener("resize",()=>{if(document.getElementById("game").classList.contains("on"))ngFit()});
+
+function paintCell(x,y){const d=ng.cells[y][x],v=ng.grid[y][x];d.classList.toggle("fill",v===1);d.classList.toggle("mark",v===2);}
+function lineMatches(arr,clue){return JSON.stringify(clueOf(arr.map(v=>v===1?1:0)))===JSON.stringify(clue)}
+function refreshClues(){
+  for(let y=0;y<ng.N;y++)ng.rowEls[y].classList.toggle("done",lineMatches(ng.grid[y],ng.rowClues[y]));
+  for(let x=0;x<ng.N;x++)ng.colEls[x].classList.toggle("done",lineMatches(ng.grid.map(r=>r[x]),ng.colClues[x]));
+}
+function checkWin(){for(let y=0;y<ng.N;y++)for(let x=0;x<ng.N;x++)if((ng.sol[y][x]===1)!==(ng.grid[y][x]===1))return false;return true;}
+function elapsed(){return ng.started?Math.floor((Date.now()-ng.started)/1000):0}
+
+let drawing=false,drawVal=0,axis=null,ox=0,oy=0;
+function cellFrom(cx,cy){const el=document.elementFromPoint(cx,cy);return el&&el.classList.contains("cell")?[+el.dataset.x,+el.dataset.y]:null}
+function startClock(){if(ng.started)return;ng.started=Date.now();
+  clockT=setInterval(()=>document.getElementById("clock").textContent=fmt(elapsed()),500);
+  if(state[ng.gameId].status==="new")state[ng.gameId].status="progress";}
+function begin(x,y,right){if(ng.solved)return;startClock();
+  const t=right?2:ng.tool,cur=ng.grid[y][x];drawVal=(cur===t)?0:t;axis=null;ox=x;oy=y;apply(x,y);drawing=true;}
+function apply(x,y){if(axis==="row"&&y!==oy)return;if(axis==="col"&&x!==ox)return;if(ng.grid[y][x]===drawVal)return;ng.grid[y][x]=drawVal;paintCell(x,y);}
+function moveTo(x,y){if(!axis&&(x!==ox||y!==oy))axis=(x!==ox)?"row":"col";apply(x,y);}
+function endStroke(){if(!drawing)return;drawing=false;refreshClues();if(!ng.solved&&checkWin())onSolve();}
+function hot(ry,cx){ng.rowEls.forEach((e,i)=>e.classList.toggle("hot",i===ry));ng.colEls.forEach((e,i)=>e.classList.toggle("hot",i===cx));}
+
+function wireNonogram(){
+  const grid=document.getElementById("grid");
+  grid.addEventListener("pointerdown",e=>{const c=cellFrom(e.clientX,e.clientY);if(!c)return;e.preventDefault();
+    begin(c[0],c[1],e.button===2);grid.setPointerCapture?.(e.pointerId);});
+  grid.addEventListener("pointermove",e=>{const c=cellFrom(e.clientX,e.clientY);if(!c)return;
+    if(drawing)moveTo(c[0],c[1]);else hot(c[1],c[0]);});
+  grid.addEventListener("pointerleave",()=>{if(!drawing)hot(-1,-1)});
+  addEventListener("pointerup",endStroke); addEventListener("pointercancel",endStroke);
+  grid.addEventListener("contextmenu",e=>e.preventDefault());
+  const tF=document.getElementById("tFill"),tM=document.getElementById("tMark");
+  tF.onclick=()=>{ng.tool=1;tF.classList.add("on");tM.classList.remove("on")};
+  tM.onclick=()=>{ng.tool=2;tM.classList.add("on");tF.classList.remove("on")};
+  document.getElementById("reset").onclick=()=>{if(ng.solved)return;
+    for(let y=0;y<ng.N;y++)for(let x=0;x<ng.N;x++){ng.grid[y][x]=0;paintCell(x,y)}refreshClues();};
+}
+
+function onSolve(){
+  ng.solved=true;clearInterval(clockT);const secs=elapsed();
+  document.getElementById("grid").classList.add("solved");hot(-1,-1);
+  const streak=recordSolve(ng.gameId,secs);
+  const label=ng.gameId==="nonomini"?"Nonogram Mini":"Nonogram";
+  document.getElementById("wtime").textContent=fmt(secs);
+  document.getElementById("wstreak").textContent=streak;
+  document.getElementById("winpic").textContent="You revealed "+ng.puzzleName+".";
+  document.getElementById("winBox").classList.add("show");
+  document.getElementById("share").onclick=()=>{
+    const pic=ng.sol.map(r=>r.map(v=>v?"🟧":"⬜").join("")).join("\n");
+    const txt=`Capygames · ${label} #${dayNum} — ${fmt(secs)}\n${pic}\n🔥 ${streak}`;
+    const btn=document.getElementById("share"),done=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent="Share result",1500)};
+    if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done,()=>fb(txt,done));else fb(txt,done);
+  };
+}
+function fb(t,cb){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(e){}a.remove();cb()}
+
+/* ================= SUDOKU ================= */
+document.getElementById("sealWin2").innerHTML=SEAL;
+const SUDOKU=[
+ {p:"920600073016050802050000000370000000000000014060020050630000400095006030040385090",s:"924618573716953842853472961371564289582739614469821357638197425195246738247385196"},
+ {p:"015630047000802100300500960090400031060301002100960580003100429400000005009000000",s:"815639247946872153327514968798425631564381792132967584673158429481296375259743816"},
+ {p:"701052094000400000000010030800143709006925040104708000402000006060200007900006050",s:"781352694653489271249617835825143769376925148194768523432571986568294317917836452"},
+ {p:"053007108100030000002951003004710800000460007700080624000800000900073050017520309",s:"653247198179638542842951763264719835385462917791385624536894271928173456417526389"},
+ {p:"030000710907000250002005000086500000070684090000001006001006000005847600608050430",s:"534268719967413258812975364486592173173684592259731846741326985395847621628159437"},
+ {p:"002090413419000000063005090300062800020104360600000009130720600506800040207006000",s:"852697413419283576763415298371962854928154367645378129134729685596831742287546931"},
+];
+const SP=SUDOKU[((today%SUDOKU.length)+SUDOKU.length)%SUDOKU.length];
+
+let su={built:false,cells:[],val:[],given:[],notes:[],sel:-1,notesMode:false,
+        started:null,solved:false,clockT:null,history:[]};
+
+function initSudoku(){
+  document.getElementById("swinBox").classList.remove("show");
+  document.getElementById("suMeta").innerHTML=pmeta("9×9");
+  if(su.built){suFit(); return;}
+  su.built=true;
+  su.val=[...SP.p].map(c=>+c);
+  su.given=[...SP.p].map(c=>c!=="0");
+  su.notes=Array.from({length:81},()=>new Set());
+  const grid=document.getElementById("sgrid");
+  for(let i=0;i<81;i++){
+    const r=i/9|0, c=i%9;
+    const d=document.createElement("div");
+    d.className="scell"+(c%3===2?" r2":"")+(r%3===2?" b2":"")+(c===8?" c8":"")+(su.given[i]?" given":"");
+    d.dataset.i=i; grid.appendChild(d); su.cells[i]=d;
+  }
+  grid.addEventListener("pointerdown",e=>{const t=e.target.closest(".scell");if(t)select(+t.dataset.i)});
+  buildPad(); wireSudoku(); renderSu(); suFit();
+}
+function suFit(){/* sizing handled by CSS clamp; hook kept for symmetry */}
+
+function buildPad(){
+  const pad=document.getElementById("spad"); pad.innerHTML="";
+  for(let n=1;n<=9;n++){const b=document.createElement("button");b.className="num";b.textContent=n;
+    b.onclick=()=>enter(n); pad.appendChild(b);}
+}
+function counts(){const c=Array(10).fill(0);for(let i=0;i<81;i++)if(su.val[i])c[su.val[i]]++;return c}
+
+function select(i){su.sel=i; renderSu();}
+function enter(n){
+  if(su.solved)return; const i=su.sel; if(i<0||su.given[i])return;
+  startSClock();
+  pushHist();
+  if(su.notesMode){
+    if(su.val[i])return;
+    su.notes[i].has(n)?su.notes[i].delete(n):su.notes[i].add(n);
+  }else{
+    su.val[i]=(su.val[i]===n)?0:n; su.notes[i].clear();
+    // clear that candidate from peers' notes for convenience
+    if(su.val[i]) peersOf(i).forEach(p=>su.notes[p].delete(n));
+  }
+  renderSu(); if(checkSWin())onSWin();
+}
+function erase(){if(su.solved)return;const i=su.sel;if(i<0||su.given[i])return;pushHist();su.val[i]=0;su.notes[i].clear();renderSu();}
+function pushHist(){su.history.push({val:[...su.val],notes:su.notes.map(s=>new Set(s))}); if(su.history.length>40)su.history.shift();}
+function undo(){if(!su.history.length||su.solved)return;const h=su.history.pop();su.val=h.val;su.notes=h.notes;renderSu();}
+
+function peersOf(i){const r=i/9|0,c=i%9,br=3*(r/3|0),bc=3*(c/3|0),set=new Set();
+  for(let k=0;k<9;k++){set.add(r*9+k);set.add(k*9+c);}
+  for(let a=0;a<3;a++)for(let b=0;b<3;b++)set.add((br+a)*9+bc+b);
+  set.delete(i);return[...set];}
+function isBad(i){const v=su.val[i];if(!v)return false;return peersOf(i).some(p=>su.val[p]===v);}
+
+function renderSu(){
+  const sel=su.sel, selVal=sel>=0?su.val[sel]:0;
+  const peers=sel>=0?new Set(peersOf(sel)):new Set();
+  for(let i=0;i<81;i++){
+    const d=su.cells[i], v=su.val[i];
+    d.classList.toggle("peer",sel>=0 && peers.has(i) && i!==sel);
+    d.classList.toggle("same",selVal>0 && v===selVal && i!==sel);
+    d.classList.toggle("sel",i===sel);
+    d.classList.toggle("bad",isBad(i));
+    if(v){d.textContent=v;}
+    else if(su.notes[i].size){
+      d.textContent="";
+      const nx=document.createElement("div");nx.className="notes";
+      for(let n=1;n<=9;n++){const s=document.createElement("span");s.textContent=su.notes[i].has(n)?n:"";nx.appendChild(s);}
+      d.innerHTML="";d.appendChild(nx);
+    }else d.textContent="";
+  }
+  const cc=counts();
+  document.querySelectorAll("#spad .num").forEach((b,idx)=>b.classList.toggle("dim",cc[idx+1]>=9));
+  if(state.sudoku.status==="new" && su.val.some((v,i)=>v && !su.given[i])) state.sudoku.status="progress";
+}
+
+function checkSWin(){for(let i=0;i<81;i++)if(su.val[i]!==+SP.s[i])return false;return true;}
+function startSClock(){if(su.started)return;su.started=Date.now();
+  su.clockT=setInterval(()=>document.getElementById("sclock").textContent=fmt(Math.floor((Date.now()-su.started)/1000)),500);}
+function onSWin(){
+  su.solved=true;clearInterval(su.clockT);
+  const secs=Math.floor((Date.now()-su.started)/1000);
+  su.sel=-1; renderSu();
+  const streak=recordSolve("sudoku",secs);
+  document.getElementById("swtime").textContent=fmt(secs);
+  document.getElementById("swstreak").textContent=streak;
+  document.getElementById("swinBox").classList.add("show");
+  document.getElementById("sshare").onclick=()=>{
+    const txt=`Capygames · Sudoku #${dayNum} — ${fmt(secs)} 🦫\n🔥 ${streak} day streak`;
+    const btn=document.getElementById("sshare"),done=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent="Share result",1500)};
+    if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done,()=>fb(txt,done));else fb(txt,done);
+  };
+}
+function wireSudoku(){
+  const nb=document.getElementById("sNotes");
+  nb.onclick=()=>{su.notesMode=!su.notesMode;nb.classList.toggle("on",su.notesMode);
+    document.getElementById("notestate").textContent=su.notesMode?"on":"off";};
+  document.getElementById("sErase").onclick=erase;
+  document.getElementById("sUndo").onclick=undo;
+  addEventListener("keydown",e=>{
+    if(!document.getElementById("sudoku").classList.contains("on"))return;
+    if(e.key>="1"&&e.key<="9")enter(+e.key);
+    else if(e.key==="Backspace"||e.key==="Delete"||e.key==="0")erase();
+    else if(e.key==="n"||e.key==="N")document.getElementById("sNotes").click();
+    else if(su.sel>=0&&["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)){
+      let r=su.sel/9|0,c=su.sel%9;
+      if(e.key==="ArrowUp")r=(r+8)%9; if(e.key==="ArrowDown")r=(r+1)%9;
+      if(e.key==="ArrowLeft")c=(c+8)%9; if(e.key==="ArrowRight")c=(c+1)%9;
+      select(r*9+c); e.preventDefault();
+    }
+  });
+}
+
+/* ================= BRIDGES (Hashiwokakero) ================= */
+document.getElementById("sealWin3").innerHTML=SEAL;
+const BRIDGES=[
+ {w:7,h:7,isl:[[1,3,6],[4,3,6],[1,5,2],[6,3,3],[4,0,3],[6,0,1],[4,5,1],[2,0,2],[1,0,2]]},
+ {w:7,h:7,isl:[[4,6,3],[4,2,3],[0,2,3],[4,0,3],[6,0,1],[2,0,2],[6,6,1],[0,0,2],[0,6,1],[0,4,1]]},
+ {w:8,h:7,isl:[[6,2,3],[6,6,2],[2,2,6],[2,0,3],[0,2,3],[4,6,4],[2,6,4],[6,0,2],[4,2,1],[0,5,1],[0,0,1]]},
+ {w:7,h:7,isl:[[5,6,3],[3,6,5],[5,3,4],[3,3,5],[3,1,2],[5,0,2],[0,1,1],[0,3,1],[0,6,1]]},
+ {w:8,h:8,isl:[[0,3,4],[0,1,3],[3,3,4],[3,5,4],[5,5,2],[5,3,2],[3,7,1],[0,7,1],[2,1,2],[5,1,1],[3,1,1],[1,5,1]]},
+ {w:7,h:8,isl:[[0,6,2],[4,6,5],[4,3,2],[7,6,3],[4,0,5],[7,2,3],[6,0,4],[0,0,2],[6,3,2],[7,0,2]]},
+];
+const BCELL=60;
+let bz={isl:[],edges:[],cross:[],count:[],W:7,H:7,started:null,solved:false,clockT:null,drag:-1};
+let bWired=false;
+
+function bEdgeBetween(a,b){return bz.edges.findIndex(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a));}
+function bCandidates(){
+  const at={}; bz.isl.forEach((p,i)=>at[p[0]+","+p[1]]=i); const edges=[];
+  bz.isl.forEach((p,i)=>{[[0,1],[1,0]].forEach(([dr,dc])=>{
+    for(let d=1;d<Math.max(bz.W,bz.H);d++){const r=p[0]+dr*d,c=p[1]+dc*d;
+      if(r<0||r>=bz.H||c<0||c>=bz.W)break; const j=at[r+","+c]; if(j!==undefined){edges.push([i,j]);break;}}});});
+  return edges;
+}
+function bCrosses(e1,e2){const A=bz.isl,hz=e=>A[e[0]][0]===A[e[1]][0];
+  if(hz(e1)===hz(e2))return false; const h=hz(e1)?e1:e2,v=hz(e1)?e2:e1;
+  const hr=A[h[0]][0],hc1=Math.min(A[h[0]][1],A[h[1]][1]),hc2=Math.max(A[h[0]][1],A[h[1]][1]);
+  const vc=A[v[0]][1],vr1=Math.min(A[v[0]][0],A[v[1]][0]),vr2=Math.max(A[v[0]][0],A[v[1]][0]);
+  return hc1<vc&&vc<hc2&&vr1<hr&&hr<vr2;}
+function bCenter(i){return [bz.isl[i][1]*BCELL+BCELL/2, bz.isl[i][0]*BCELL+BCELL/2];}
+function bDeg(){const d=bz.isl.map(()=>0);bz.edges.forEach((e,i)=>{d[e[0]]+=bz.count[i];d[e[1]]+=bz.count[i];});return d;}
+
+function initBridges(){
+  const set=BRIDGES,pz=set[((today%set.length)+set.length)%set.length];
+  bz={isl:pz.isl.map(p=>[...p]),W:pz.w,H:pz.h,edges:[],cross:[],count:[],started:null,solved:false,clockT:null,drag:-1};
+  bz.edges=bCandidates(); bz.count=bz.edges.map(()=>0);
+  bz.cross=bz.edges.map((_,i)=>{const a=[];bz.edges.forEach((__,j)=>{if(i!==j&&bCrosses(bz.edges[i],bz.edges[j]))a.push(j);});return a;});
+  document.getElementById("bwinBox").classList.remove("show");
+  document.getElementById("bclock").textContent="0:00";
+  document.getElementById("bMeta").innerHTML=pmeta(bz.W+"×"+bz.H);
+  document.getElementById("bsvg").setAttribute("viewBox",`0 0 ${bz.W*BCELL} ${bz.H*BCELL}`);
+  if(!bWired){wireBridges();bWired=true;}
+  renderBridges();
+}
+function renderBridges(prev){
+  const svg=document.getElementById("bsvg"),deg=bDeg(); let s="";
+  bz.edges.forEach((e,i)=>{if(!bz.count[i])return; const [x1,y1]=bCenter(e[0]),[x2,y2]=bCenter(e[1]);
+    if(bz.count[i]===1){s+=`<line class="brg" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;}
+    else{const horiz=y1===y2,off=4.5,ox=horiz?0:off,oy=horiz?off:0;
+      s+=`<line class="brg" x1="${x1-ox}" y1="${y1-oy}" x2="${x2-ox}" y2="${y2-oy}"/>`;
+      s+=`<line class="brg" x1="${x1+ox}" y1="${y1+oy}" x2="${x2+ox}" y2="${y2+oy}"/>`;}});
+  if(prev)s+=prev;
+  bz.isl.forEach((p,i)=>{const [cx,cy]=bCenter(i),r=BCELL*0.34;
+    const cls=deg[i]===p[2]?"isle done":(deg[i]>p[2]?"isle over":"isle");
+    const lcls=deg[i]===p[2]?"islabel ilab done":(deg[i]>p[2]?"islabel ilab over":"islabel");
+    s+=`<circle class="${cls}" cx="${cx}" cy="${cy}" r="${r}"/>`;
+    s+=`<text class="${lcls}" x="${cx}" y="${cy}">${p[2]}</text>`;
+    s+=`<circle class="ihit" cx="${cx}" cy="${cy}" r="${BCELL*0.46}" data-i="${i}"/>`;});
+  svg.innerHTML=s;
+}
+function bToSvg(cx,cy){const r=document.getElementById("bsvg").getBoundingClientRect();
+  return [(cx-r.left)/r.width*bz.W*BCELL,(cy-r.top)/r.height*bz.H*BCELL];}
+function bNearIsland(x,y){let best=-1,bd=1e9;bz.isl.forEach((p,i)=>{const cx=p[1]*BCELL+BCELL/2,cy=p[0]*BCELL+BCELL/2;
+  const d=Math.hypot(x-cx,y-cy);if(d<bd){bd=d;best=i;}});return bd<BCELL*0.55?best:-1;}
+function startBClock(){if(bz.started)return;bz.started=Date.now();
+  bz.clockT=setInterval(()=>document.getElementById("bclock").textContent=fmt(Math.floor((Date.now()-bz.started)/1000)),500);
+  if(state.bridges.status==="new")state.bridges.status="progress";}
+function wireBridges(){
+  const svg=document.getElementById("bsvg");
+  svg.addEventListener("pointerdown",e=>{const [x,y]=bToSvg(e.clientX,e.clientY),i=bNearIsland(x,y);
+    if(i<0)return;e.preventDefault();bz.drag=i;svg.setPointerCapture?.(e.pointerId);});
+  svg.addEventListener("pointermove",e=>{if(bz.drag<0)return;const [x,y]=bToSvg(e.clientX,e.clientY),[cx,cy]=bCenter(bz.drag);
+    renderBridges(`<line class="brg-prev" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/>`);});
+  const finish=e=>{if(bz.drag<0)return;const from=bz.drag;bz.drag=-1;
+    const [x,y]=bToSvg(e.clientX,e.clientY),to=bNearIsland(x,y);
+    if(to>=0&&to!==from){const idx=bEdgeBetween(from,to);
+      if(idx>=0){const next=(bz.count[idx]+1)%3;
+        if(next>0&&bz.cross[idx].some(j=>bz.count[j]>0))toast("Bridges can't cross");
+        else{bz.count[idx]=next;startBClock();}}}
+    renderBridges(); if(!bz.solved&&bWin())onBWin();};
+  svg.addEventListener("pointerup",finish);
+  svg.addEventListener("pointercancel",()=>{bz.drag=-1;renderBridges();});
+  document.getElementById("bReset").onclick=()=>{if(bz.solved)return;bz.count=bz.count.map(()=>0);renderBridges();};
+}
+function bWin(){const deg=bDeg();
+  for(let i=0;i<bz.isl.length;i++)if(deg[i]!==bz.isl[i][2])return false;
+  const adj=bz.isl.map(()=>[]);bz.edges.forEach((e,i)=>{if(bz.count[i]>0){adj[e[0]].push(e[1]);adj[e[1]].push(e[0]);}});
+  const seen=new Set([0]),st=[0];while(st.length){const x=st.pop();adj[x].forEach(y=>{if(!seen.has(y)){seen.add(y);st.push(y);}});}
+  return seen.size===bz.isl.length;}
+function onBWin(){
+  bz.solved=true;clearInterval(bz.clockT);const secs=Math.floor((Date.now()-bz.started)/1000);
+  const streak=recordSolve("bridges",secs);
+  document.getElementById("bwtime").textContent=fmt(secs);
+  document.getElementById("bwstreak").textContent=streak;
+  document.getElementById("bwinBox").classList.add("show");
+  document.getElementById("bshare").onclick=()=>{
+    const txt=`Capygames · Bridges #${dayNum} — ${fmt(secs)} 🦫\n🔥 ${streak} day streak`;
+    const btn=document.getElementById("bshare"),done=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent="Share result",1500)};
+    if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done,()=>fb(txt,done));else fb(txt,done);};
+}
+
+/* ================= KAKURO ================= */
+document.getElementById("sealWin4").innerHTML=SEAL;
+const KN=5;
+const KAKURO=[
+ {entries:[[1,1],[1,2],[2,1],[2,2],[2,3],[3,2],[3,3],[3,4],[4,3],[4,4]],across:[[1,0,4],[2,0,22],[3,1,20],[4,2,8]],down:[[0,1,10],[0,2,19],[1,3,10],[2,4,15]],sol:[[1,1,1],[1,2,3],[2,1,9],[2,2,7],[2,3,6],[3,2,9],[3,3,3],[3,4,8],[4,3,1],[4,4,7]]},
+ {entries:[[1,1],[1,2],[2,1],[2,2],[2,3],[3,2],[3,3],[3,4],[4,3],[4,4]],across:[[1,0,10],[2,0,16],[3,1,14],[4,2,6]],down:[[0,1,6],[0,2,22],[1,3,7],[2,4,11]],sol:[[1,1,1],[1,2,9],[2,1,5],[2,2,7],[2,3,4],[3,2,6],[3,3,1],[3,4,7],[4,3,2],[4,4,4]]},
+ {entries:[[1,1],[1,2],[2,1],[2,2],[2,3],[3,2],[3,3],[3,4],[4,3],[4,4]],across:[[1,0,13],[2,0,14],[3,1,7],[4,2,4]],down:[[0,1,13],[0,2,7],[1,3,14],[2,4,4]],sol:[[1,1,9],[1,2,4],[2,1,4],[2,2,1],[2,3,9],[3,2,2],[3,3,4],[3,4,1],[4,3,1],[4,4,3]]},
+ {entries:[[1,1],[1,2],[2,1],[2,2],[2,3],[3,2],[3,3],[3,4],[4,3],[4,4]],across:[[1,0,11],[2,0,12],[3,1,18],[4,2,8]],down:[[0,1,7],[0,2,9],[1,3,20],[2,4,13]],sol:[[1,1,6],[1,2,5],[2,1,1],[2,2,3],[2,3,8],[3,2,1],[3,3,9],[3,4,8],[4,3,3],[4,4,5]]},
+ {entries:[[1,1],[1,2],[2,1],[2,2],[2,3],[3,2],[3,3],[3,4],[4,3],[4,4]],across:[[1,0,4],[2,0,13],[3,1,23],[4,2,14]],down:[[0,1,3],[0,2,20],[1,3,16],[2,4,15]],sol:[[1,1,1],[1,2,3],[2,1,2],[2,2,8],[2,3,3],[3,2,9],[3,3,8],[3,4,6],[4,3,5],[4,4,9]]},
+ {entries:[[1,1],[1,2],[2,1],[2,2],[2,3],[3,2],[3,3],[3,4],[4,3],[4,4]],across:[[1,0,16],[2,0,17],[3,1,7],[4,2,10]],down:[[0,1,15],[0,2,10],[1,3,12],[2,4,13]],sol:[[1,1,9],[1,2,7],[2,1,6],[2,2,2],[2,3,9],[3,2,1],[3,3,2],[3,4,4],[4,3,1],[4,4,9]]},
+];
+let kz={}, kWired=false;
+
+function kRuns(entries,clues,dir){
+  const eset=new Set(entries.map(e=>e[0]+","+e[1])), runs=[];
+  clues.forEach(([r,c,sum])=>{const cells=[];let rr=r,cc=c;
+    while(true){ if(dir==="a")cc++; else rr++; if(!eset.has(rr+","+cc))break; cells.push([rr,cc]); }
+    runs.push({sum,cells});});
+  return runs;
+}
+function initKakuro(){
+  const set=KAKURO, pz=set[((today%set.length)+set.length)%set.length];
+  const eset=new Set(pz.entries.map(e=>e[0]+","+e[1])), aClue={}, dClue={}, sol={};
+  pz.across.forEach(([r,c,s])=>aClue[r+","+c]=s);
+  pz.down.forEach(([r,c,s])=>dClue[r+","+c]=s);
+  pz.sol.forEach(([r,c,v])=>sol[r+","+c]=v);
+  const arunOf={}, drunOf={};
+  kRuns(pz.entries,pz.across,"a").forEach(run=>run.cells.forEach(([r,c])=>arunOf[r+","+c]=run));
+  kRuns(pz.entries,pz.down,"d").forEach(run=>run.cells.forEach(([r,c])=>drunOf[r+","+c]=run));
+  kz={eset,aClue,dClue,sol,arunOf,drunOf,entries:pz.entries,val:{},sel:null,started:null,solved:false,clockT:null,cells:{}};
+  document.getElementById("kwinBox").classList.remove("show");
+  document.getElementById("kclock").textContent="0:00";
+  document.getElementById("kMeta").innerHTML=pmeta("5×5");
+  const grid=document.getElementById("kgrid");
+  grid.style.setProperty("--kn",KN); grid.style.gridTemplateColumns=`repeat(${KN},var(--kc))`; grid.innerHTML="";
+  for(let r=0;r<KN;r++)for(let c=0;c<KN;c++){
+    const key=r+","+c, d=document.createElement("div");
+    if(eset.has(key)){d.className="kcell white"; d.dataset.k=key;}
+    else{
+      const ac=aClue[key], dn=dClue[key];
+      if(ac!==undefined||dn!==undefined){d.className="kcell block";
+        d.innerHTML=`<div class="kclue"><svg class="kslash" viewBox="0 0 10 10" preserveAspectRatio="none"><line x1="0" y1="0" x2="10" y2="10" stroke="#6E665B" stroke-width="0.5"/></svg>`+
+          (dn!==undefined?`<span class="ac">${dn}</span>`:"")+(ac!==undefined?`<span class="dn">${ac}</span>`:"")+`</div>`;
+      } else d.className="kcell block";
+    }
+    grid.appendChild(d); kz.cells[key]=d;
+  }
+  if(!kWired){kbuildPad(); wireKakuro(); kWired=true;}
+  renderKakuro();
+}
+function isKBad(key){const v=kz.val[key]; if(!v)return false;
+  const a=kz.arunOf[key], dn=kz.drunOf[key];
+  return (a&&a.cells.some(([r,c])=>(r+","+c)!==key&&kz.val[r+","+c]===v))
+       ||(dn&&dn.cells.some(([r,c])=>(r+","+c)!==key&&kz.val[r+","+c]===v));
+}
+function renderKakuro(){
+  const sel=kz.sel, peer=new Set();
+  if(sel){[kz.arunOf[sel],kz.drunOf[sel]].forEach(run=>run&&run.cells.forEach(([r,c])=>peer.add(r+","+c)));}
+  kz.entries.forEach(([r,c])=>{const key=r+","+c,d=kz.cells[key],v=kz.val[key];
+    d.textContent=v||""; d.classList.toggle("sel",key===sel);
+    d.classList.toggle("peer",peer.has(key)&&key!==sel); d.classList.toggle("bad",isKBad(key));});
+}
+function kbuildPad(){const pad=document.getElementById("kpad"); pad.innerHTML="";
+  for(let n=1;n<=9;n++){const b=document.createElement("button");b.className="num";b.textContent=n;b.onclick=()=>kEnter(n);pad.appendChild(b);}}
+function startKClock(){if(kz.started)return;kz.started=Date.now();
+  kz.clockT=setInterval(()=>document.getElementById("kclock").textContent=fmt(Math.floor((Date.now()-kz.started)/1000)),500);
+  if(state.kakuro.status==="new")state.kakuro.status="progress";}
+function kEnter(n){if(kz.solved||!kz.sel)return;startKClock();
+  const key=kz.sel; if(kz.val[key]===n)delete kz.val[key]; else kz.val[key]=n;
+  renderKakuro(); if(kWin())onKWin();}
+function kErase(){if(kz.solved||!kz.sel)return;delete kz.val[kz.sel];renderKakuro();}
+function kWin(){return kz.entries.every(([r,c])=>kz.val[r+","+c]===kz.sol[r+","+c]);}
+function wireKakuro(){
+  document.getElementById("kgrid").addEventListener("pointerdown",e=>{const t=e.target.closest(".kcell.white");if(t){kz.sel=t.dataset.k;renderKakuro();}});
+  document.getElementById("kErase").onclick=kErase;
+  document.getElementById("kCheck").onclick=()=>{
+    let wrong=0; kz.entries.forEach(([r,c])=>{const key=r+","+c,v=kz.val[key];
+      if(v&&v!==kz.sol[key]){wrong++;kz.cells[key].classList.add("bad");}});
+    if(kWin())onKWin(); else toast(wrong?`${wrong} cell${wrong>1?"s":""} off`:"Not complete yet");
+  };
+  addEventListener("keydown",e=>{if(!document.getElementById("kakuro").classList.contains("on"))return;
+    if(e.key>="1"&&e.key<="9")kEnter(+e.key); else if(e.key==="Backspace"||e.key==="Delete"||e.key==="0")kErase();});
+}
+function onKWin(){
+  kz.solved=true; clearInterval(kz.clockT); const secs=kz.started?Math.floor((Date.now()-kz.started)/1000):0;
+  kz.sel=null; renderKakuro();
+  const streak=recordSolve("kakuro",secs);
+  document.getElementById("kwtime").textContent=fmt(secs);
+  document.getElementById("kwstreak").textContent=streak;
+  document.getElementById("kwinBox").classList.add("show");
+  document.getElementById("kshare").onclick=()=>{
+    const txt=`Capygames · Kakuro #${dayNum} — ${fmt(secs)} 🦫\n🔥 ${streak} day streak`;
+    const btn=document.getElementById("kshare"),done=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent="Share result",1500)};
+    if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done,()=>fb(txt,done));else fb(txt,done);};
+}
+
+/* ---------- boot ---------- */
+renderTiles(); refreshHub();
+</script>
+</body>
+</html>
