@@ -42,7 +42,7 @@ export const GAMES: GameMeta[] = [
     jp: "数独",
     desc: "Fill the grid so every row, column and box holds 1–9.",
     live: true,
-    glyph: `<svg width="34" height="34" viewBox="0 0 34 34" font-family="Zen Kaku Gothic New" font-weight="700" font-size="11" fill="currentColor"><rect x="1.5" y="1.5" width="31" height="31" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="2" x2="12" y2="32" stroke="var(--line-2)"/><line x1="22.5" y1="2" x2="22.5" y2="32" stroke="var(--line-2)"/><line x1="2" y1="12" x2="32" y2="12" stroke="var(--line-2)"/><line x1="2" y1="22.5" x2="32" y2="22.5" stroke="var(--line-2)"/><text x="6" y="10">5</text><text x="27" y="20.5">3</text><text x="16" y="30">8</text></svg>`,
+    glyph: `<svg width="34" height="34" viewBox="0 0 34 34" font-family="Zen Kaku Gothic New" font-weight="700" font-size="11" fill="currentColor"><rect x="1.5" y="1.5" width="31" height="31" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="2" x2="12" y2="32" stroke="currentColor" stroke-opacity="0.2"/><line x1="22.5" y1="2" x2="22.5" y2="32" stroke="currentColor" stroke-opacity="0.2"/><line x1="2" y1="12" x2="32" y2="12" stroke="currentColor" stroke-opacity="0.2"/><line x1="2" y1="22.5" x2="32" y2="22.5" stroke="currentColor" stroke-opacity="0.2"/><text x="6" y="10">5</text><text x="27" y="20.5">3</text><text x="16" y="30">8</text></svg>`,
   },
   {
     id: "bridges",
@@ -58,6 +58,6 @@ export const GAMES: GameMeta[] = [
     jp: "カックロ",
     desc: "A number crossword — entries add up to the clues.",
     live: true,
-    glyph: `<svg width="34" height="34" viewBox="0 0 34 34" font-family="Zen Kaku Gothic New" font-weight="700" font-size="8"><rect x="2" y="2" width="14" height="14" fill="currentColor"/><line x1="2" y1="2" x2="16" y2="16" stroke="var(--ink-soft)"/><text x="9.5" y="13" fill="var(--card)">16</text><text x="4" y="8" fill="var(--card)">\</text><rect x="18" y="2" width="14" height="14" rx="2" fill="none" stroke="var(--line-2)" stroke-width="1.4"/><rect x="2" y="18" width="14" height="14" rx="2" fill="none" stroke="var(--line-2)" stroke-width="1.4"/><rect x="18" y="18" width="14" height="14" rx="2" fill="none" stroke="var(--line-2)" stroke-width="1.4"/></svg>`,
+    glyph: `<svg width="34" height="34" viewBox="0 0 34 34" font-family="Zen Kaku Gothic New" font-weight="700" font-size="8"><rect x="2" y="2" width="14" height="14" fill="currentColor"/><line x1="2" y1="2" x2="16" y2="16" stroke="var(--card)" stroke-opacity="0.6"/><text x="9.5" y="13" fill="var(--card)">16</text><text x="4" y="8" fill="var(--card)">\</text><rect x="18" y="2" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.4"/><rect x="2" y="18" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.4"/><rect x="18" y="18" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.4"/></svg>`,
   },
 ];
