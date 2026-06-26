@@ -25,7 +25,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${zenMaru.variable} ${zenKaku.variable}`}>
+    <html lang="en" className={`${zenMaru.variable} ${zenKaku.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Anti-FOUC: apply stored theme before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('capygames-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}` }} />
+      </head>
       <body>{children}</body>
     </html>
   );

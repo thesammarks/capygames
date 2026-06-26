@@ -20,8 +20,29 @@
   --gutter: 104px;
 }
 
+/* Explicit dark: set by ThemeToggle via data-theme="dark" */
+:root[data-theme="dark"] {
+  --paper: #1A1714;
+  --card: #242018;
+  --ink: #F0EBE3;
+  --ink-soft: #9E9588;
+  --ink-faint: #5E5850;
+  --line: #2D2924;
+  --line-2: #3A352F;
+  /* yuzu-wash stays warm but becomes a translucent tint so dark ink stays readable */
+  --yuzu-wash: rgba(243, 162, 32, 0.22);
+  --yuzu-wash-2: rgba(243, 162, 32, 0.10);
+  color-scheme: dark;
+}
+
+/* Explicit light: beats system dark preference */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* System preference: only when user hasn't picked a mode */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --paper: #1A1714;
     --card: #242018;
     --ink: #F0EBE3;
@@ -29,6 +50,9 @@
     --ink-faint: #5E5850;
     --line: #2D2924;
     --line-2: #3A352F;
+    --yuzu-wash: rgba(243, 162, 32, 0.22);
+    --yuzu-wash-2: rgba(243, 162, 32, 0.10);
+    color-scheme: dark;
   }
 }
 
@@ -42,7 +66,7 @@
 
 html {
   height: 100%;
-  color-scheme: light dark;
+  color-scheme: light dark; /* overridden per-theme below */
 }
 
 html,

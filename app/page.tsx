@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { GAMES } from "@/lib/rules";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { todayUTC, fmt } from "@/lib/daily";
+import { todayUTC } from "@/lib/daily";
+import ThemeToggle from "@/components/ThemeToggle";
+import HubTiles from "@/components/HubTiles";
 import styles from "./page.module.css";
 
 interface GameStatus {
@@ -11,15 +12,16 @@ interface GameStatus {
 }
 
 export default async function Home() {
-  // Fetch user's progress for today's puzzles
+  const today = todayUTC();
   const progressMap: Record<string, GameStatus> = {};
+  let isAuthenticated = false;
 
   try {
     const userClient = await createClient();
     const { data: { user } } = await userClient.auth.getUser();
 
     if (user) {
-      const today = todayUTC();
+      isAuthenticated = true;
       const service = createServiceClient();
       const { data: puzzles } = await service
         .from("puzzles")
@@ -41,7 +43,7 @@ export default async function Home() {
       }
     }
   } catch {
-    // Not signed in or DB error — show all tiles as "New"
+    // Not signed in or DB error — tiles handled client-side via localStorage
   }
 
   const doneCount = Object.values(progressMap).filter((p) => p.status === "solved").length;
@@ -49,11 +51,14 @@ export default async function Home() {
   return (
     <main className={styles.main}>
       <header className={styles.header}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/favicon.svg" alt="" className={styles.logo} />
-        <h1 className={styles.title}>
-          Capy<span>games</span>
-        </h1>
+        <div className={styles.brand}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/favicon.svg" alt="" className={styles.logo} />
+          <h1 className={styles.title}>
+            Capy<span>games</span>
+          </h1>
+        </div>
+        <ThemeToggle />
       </header>
 
       <div className={styles.hero}>
@@ -66,46 +71,12 @@ export default async function Home() {
         </p>
       </div>
 
-      <section className={styles.grid}>
-        {GAMES.map((g) => {
-          const ps = progressMap[g.id];
-          const isDone = ps?.status === "solved";
-          const isProg = ps?.status === "in_progress";
-
-          return (
-            <Link key={g.id} href={`/play/${g.id}`} className={styles.tile}>
-              <div className={styles.tileTop}>
-                <div
-                  className={styles.glyph}
-                  dangerouslySetInnerHTML={{ __html: g.glyph }}
-                />
-              </div>
-              <div className={styles.tileName}>
-                {g.name}
-                <span className={styles.tileJp}>{g.jp}</span>
-              </div>
-              <p className={styles.tileDesc}>{g.desc}</p>
-              <div
-                className={`${styles.tileStatus}${isDone ? ` ${styles.tileStatusDone}` : ""}`}
-              >
-                <span
-                  className={`${styles.dotmark}${isDone ? ` ${styles.dotmarkDone}` : isProg ? ` ${styles.dotmarkProg}` : ""}`}
-                />
-                <span>
-                  {isDone
-                    ? `Solved · ${fmt(ps.duration_seconds ?? 0)}`
-                    : isProg
-                      ? "In progress"
-                      : "New"}
-                </span>
-                {!isDone && (
-                  <span className={styles.play}>Play →</span>
-                )}
-              </div>
-            </Link>
-          );
-        })}
-      </section>
+      <HubTiles
+        games={GAMES}
+        serverProgress={progressMap}
+        isAuthenticated={isAuthenticated}
+        today={today}
+      />
     </main>
   );
 }
