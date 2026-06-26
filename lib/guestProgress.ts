@@ -37,3 +37,18 @@ export function setGuestProgress(
     // ignore — private browsing, quota exceeded, etc.
   }
 }
+
+export async function migrateGuestProgress(date: string): Promise<void> {
+  try {
+    const raw = localStorage.getItem(key(date));
+    if (!raw) return;
+    await fetch("/api/migrate-guest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, progress: JSON.parse(raw) }),
+    });
+    localStorage.removeItem(key(date));
+  } catch {
+    // Non-critical — migration can be retried on next sign-in
+  }
+}

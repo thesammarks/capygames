@@ -1,9 +1,12 @@
+import { Suspense } from "react";
 import { GAMES } from "@/lib/rules";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { todayUTC } from "@/lib/daily";
 import ThemeToggle from "@/components/ThemeToggle";
+import UserMenu from "@/components/UserMenu";
 import HubTiles from "@/components/HubTiles";
+import PostLoginMigrate from "@/components/PostLoginMigrate";
 import styles from "./page.module.css";
 
 interface GameStatus {
@@ -15,6 +18,7 @@ export default async function Home() {
   const today = todayUTC();
   const progressMap: Record<string, GameStatus> = {};
   let isAuthenticated = false;
+  let username: string | null = null;
 
   try {
     const userClient = await createClient();
@@ -22,20 +26,23 @@ export default async function Home() {
 
     if (user) {
       isAuthenticated = true;
-      const service = createServiceClient();
-      const { data: puzzles } = await service
-        .from("puzzles")
-        .select("id, game")
-        .eq("play_date", today);
 
-      if (puzzles?.length) {
+      // Fetch profile and today's progress in parallel
+      const [profileResult, puzzlesResult] = await Promise.all([
+        userClient.from("profiles").select("username").eq("id", user.id).maybeSingle(),
+        createServiceClient().from("puzzles").select("id, game").eq("play_date", today),
+      ]);
+
+      username = profileResult.data?.username ?? null;
+
+      if (puzzlesResult.data?.length) {
         const { data: progress } = await userClient
           .from("progress")
           .select("puzzle_id, status, duration_seconds")
-          .in("puzzle_id", puzzles.map((p) => p.id));
+          .in("puzzle_id", puzzlesResult.data.map((p) => p.id));
 
         if (progress) {
-          puzzles.forEach((p) => {
+          puzzlesResult.data.forEach((p) => {
             const pr = progress.find((r) => r.puzzle_id === p.id);
             if (pr) progressMap[p.game] = { status: pr.status as GameStatus["status"], duration_seconds: pr.duration_seconds };
           });
@@ -50,6 +57,9 @@ export default async function Home() {
 
   return (
     <main className={styles.main}>
+      <Suspense>
+        <PostLoginMigrate />
+      </Suspense>
       <header className={styles.header}>
         <div className={styles.brand}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -58,7 +68,10 @@ export default async function Home() {
             Capy<span>games</span>
           </h1>
         </div>
-        <ThemeToggle />
+        <div className={styles.headerRight}>
+          <UserMenu username={username} isAuthenticated={isAuthenticated} />
+          <ThemeToggle />
+        </div>
       </header>
 
       <div className={styles.hero}>
