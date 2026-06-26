@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
-import { checkWin } from "@/lib/games/sudoku";
+import { checkWin as sudokuCheckWin } from "@/lib/games/sudoku";
+import { checkWin as nonogramCheckWin } from "@/lib/games/nonogram";
 import { todayUTC } from "@/lib/daily";
 import { NextResponse } from "next/server";
 
@@ -91,16 +92,20 @@ function validateSubmission(
   submission: unknown,
   solution: unknown
 ): boolean {
+  const sol = solution as Record<string, string>;
+
   if (game === "sudoku") {
     if (!Array.isArray(submission)) return false;
-    // Solution stored as { answer: "81-char-string" } in jsonb
-    const solutionStr =
-      typeof solution === "string"
-        ? solution
-        : (solution as Record<string, string>)?.answer;
-    if (!solutionStr) return false;
-    return checkWin(submission as number[], solutionStr);
+    const answer = typeof solution === "string" ? solution : sol?.answer;
+    if (!answer) return false;
+    return sudokuCheckWin(submission as number[], answer);
   }
-  // Other games: direct equality check (replaced per-game in Phase 4)
-  return JSON.stringify(submission) === JSON.stringify(solution);
+
+  if (game === "nonogram" || game === "nonomini") {
+    if (!Array.isArray(submission)) return false;
+    if (!sol?.answer) return false;
+    return nonogramCheckWin(submission as number[], sol.answer);
+  }
+
+  return false;
 }

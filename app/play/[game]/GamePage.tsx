@@ -6,6 +6,7 @@ import StartScreen from "@/components/StartScreen";
 import GameClock from "@/components/GameClock";
 import ThemeToggle from "@/components/ThemeToggle";
 import Sudoku from "@/components/games/Sudoku";
+import Nonogram from "@/components/games/Nonogram";
 import { getGuestProgress, setGuestProgress } from "@/lib/guestProgress";
 import styles from "./GamePage.module.css";
 
@@ -133,7 +134,16 @@ export default function GamePage({
         />
       )}
 
-      {gameReady && game !== "sudoku" && (
+      {gameReady && (game === "nonogram" || game === "nonomini") && (
+        <Nonogram
+          puzzleId={puzzleId}
+          clues={(puzzleData as { clues: { rows: number[][]; cols: number[][] } }).clues}
+          startedAt={startedAt}
+          onSolve={handleSolve}
+        />
+      )}
+
+      {gameReady && game !== "sudoku" && game !== "nonogram" && game !== "nonomini" && (
         <div style={{ padding: "2rem", textAlign: "center", fontFamily: "var(--kaku)", color: "var(--ink-soft)" }}>
           {gameName} coming soon.
         </div>
