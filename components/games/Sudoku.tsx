@@ -24,10 +24,24 @@ function cloneNotes(notes: boolean[][]): boolean[][] {
   return notes.map((cell) => [...cell]);
 }
 
-export default function Sudoku({ clues, startedAt, glyph, onSolve }: Props) {
+function loadBoard(puzzleId: number, given: number[]): { val: number[]; notes: boolean[][] } {
+  try {
+    const raw = localStorage.getItem(`cg_board_${puzzleId}`);
+    if (raw) {
+      const saved = JSON.parse(raw) as { val?: number[]; notes?: boolean[][] };
+      if (Array.isArray(saved.val) && saved.val.length === 81 &&
+          Array.isArray(saved.notes) && saved.notes.length === 81) {
+        return { val: saved.val, notes: saved.notes };
+      }
+    }
+  } catch {}
+  return { val: [...given], notes: emptyNotes() };
+}
+
+export default function Sudoku({ puzzleId, clues, startedAt, glyph, onSolve }: Props) {
   const given = parseClues(clues);
-  const [val, setVal] = useState<number[]>([...given]);
-  const [notes, setNotes] = useState<boolean[][]>(emptyNotes);
+  const [val, setVal] = useState<number[]>(() => loadBoard(puzzleId, given).val);
+  const [notes, setNotes] = useState<boolean[][]>(() => loadBoard(puzzleId, given).notes);
   const [selected, setSelected] = useState<number | null>(null);
   const [notesMode, setNotesMode] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -83,6 +97,14 @@ export default function Sudoku({ clues, startedAt, glyph, onSolve }: Props) {
       return h.slice(0, -1);
     });
   }, []);
+
+  // Persist board state so it survives navigation (restored in loadBoard on next mount)
+  useEffect(() => {
+    if (solvedAt) return; // don't overwrite with fully-solved board; win state not persisted
+    try {
+      localStorage.setItem(`cg_board_${puzzleId}`, JSON.stringify({ val, notes }));
+    } catch {}
+  }, [puzzleId, val, notes, solvedAt]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

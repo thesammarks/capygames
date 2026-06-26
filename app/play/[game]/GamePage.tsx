@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import StartScreen from "@/components/StartScreen";
 import GameClock from "@/components/GameClock";
+import ThemeToggle from "@/components/ThemeToggle";
 import Sudoku from "@/components/games/Sudoku";
+import { getGuestProgress, setGuestProgress } from "@/lib/guestProgress";
 import styles from "./GamePage.module.css";
 
 interface Props {
@@ -33,23 +35,49 @@ export default function GamePage({
   const [status, setStatus] = useState(initialStatus);
   const [startedAt, setStartedAt] = useState<number | null>(null);
 
+  // Restore startedAt: sessionStorage first (fast path), then localStorage (survives tab close)
   useEffect(() => {
     const stored = sessionStorage.getItem(storageKey);
-    if (stored) setStartedAt(Number(stored));
-  }, [storageKey]);
+    if (stored) {
+      setStartedAt(Number(stored));
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const prog = getGuestProgress(today)[game];
+    if (prog?.startedAt) {
+      setStartedAt(prog.startedAt);
+      sessionStorage.setItem(storageKey, String(prog.startedAt));
+    }
+  }, [storageKey, game]);
+
+  // Sync status from localStorage for guests (server always sends "new").
+  // Do NOT set gameReady here — board stays hidden until the user clicks Continue.
+  // Board state is restored lazily by Sudoku's loadBoard initializer on mount.
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const prog = getGuestProgress(today)[game];
+    if (!prog) return;
+    setStatus(prog.status);
+  }, [game]);
 
   function handlePlay() {
     if (!gameReady) setGameReady(true);
     setShowStart(false);
+    const today = new Date().toISOString().slice(0, 10);
     if (!startedAt) {
       const t = Date.now();
       setStartedAt(t);
       sessionStorage.setItem(storageKey, String(t));
+      setGuestProgress(today, game, "in_progress", null, t);
+    } else {
+      setGuestProgress(today, game, "in_progress", null);
     }
   }
 
   async function handleSolve(seconds: number, assisted: boolean, submission: unknown) {
     setStatus("solved");
+    const today = new Date().toISOString().slice(0, 10);
+    setGuestProgress(today, game, "solved", seconds);
     try {
       await fetch("/api/complete", {
         method: "POST",
@@ -75,7 +103,8 @@ export default function GamePage({
           <span className={styles.meta}>
             {gameName} · Daily #{dailyNumber}
           </span>
-          <GameClock startedAt={showStart ? null : startedAt} />
+          {startedAt && <GameClock startedAt={startedAt} paused={showStart} />}
+          <ThemeToggle />
         </div>
       </header>
 
@@ -89,6 +118,7 @@ export default function GamePage({
           streak={streak}
           bestSeconds={bestSeconds}
           status={status}
+          startedAt={startedAt}
           onPlay={handlePlay}
         />
       )}

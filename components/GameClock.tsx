@@ -14,15 +14,14 @@ export default function GameClock({ startedAt, paused }: Props) {
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (!startedAt) return;
 
-    if (!startedAt || paused) return;
+    const tick = () => setDisplay(fmt(Math.floor((Date.now() - startedAt) / 1000)));
+    tick(); // always snapshot immediately, even when paused
 
-    const tick = () => {
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      setDisplay(fmt(elapsed));
-    };
-    tick();
-    intervalRef.current = setInterval(tick, 500);
+    if (!paused) {
+      intervalRef.current = setInterval(tick, 500);
+    }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);

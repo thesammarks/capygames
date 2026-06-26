@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fmt } from "@/lib/daily";
 import styles from "./StartScreen.module.css";
@@ -13,15 +14,25 @@ interface Props {
   streak: number;
   bestSeconds: number | null;
   status: "new" | "in_progress" | "solved";
+  startedAt?: number | null;
   onPlay: () => void;
 }
 
 export default function StartScreen({
-  gameName, gameJp, glyph, rule, dailyNumber, streak, bestSeconds, status, onPlay,
+  gameName, gameJp, glyph, rule, dailyNumber, streak, bestSeconds, status, startedAt, onPlay,
 }: Props) {
+  const [elapsed, setElapsed] = useState(0);
+
+  // Snapshot how much time was already spent — static, not ticking.
+  // The live clock only starts once the user clicks Continue.
+  useEffect(() => {
+    if (status !== "in_progress" || !startedAt) return;
+    setElapsed(Math.floor((Date.now() - startedAt) / 1000));
+  }, [status, startedAt]);
+
   const actionLabel =
     status === "solved" ? "See result" :
-    status === "in_progress" ? "Continue" :
+    status === "in_progress" ? `Continue · ${fmt(elapsed)}` :
     "Play";
 
   return (
