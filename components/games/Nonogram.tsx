@@ -9,11 +9,12 @@ interface Props {
   puzzleId: number;
   clues: { rows: number[][]; cols: number[][] };
   startedAt: number | null;
+  initialSolved?: boolean;
   glyph?: string;
   onSolve?: (seconds: number, assisted: boolean, submission: number[]) => void;
 }
 
-export default function Nonogram({ puzzleId, clues, startedAt, onSolve }: Props) {
+export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = false, onSolve }: Props) {
   const N = clues.rows.length;
   const BOARD_KEY = `cg_board_${puzzleId}`;
 
@@ -32,7 +33,7 @@ export default function Nonogram({ puzzleId, clues, startedAt, onSolve }: Props)
 
   const [tool, setTool] = useState<1 | 2>(1);
   const [history, setHistory] = useState<number[][]>([]);
-  const [solved, setSolved] = useState(false);
+  const [solved, setSolved] = useState(initialSolved);
   const [cellSize, setCellSize] = useState(N <= 6 ? 54 : 38);
 
   // Refs for drag state — avoids stale closure issues in event handlers
@@ -42,7 +43,7 @@ export default function Nonogram({ puzzleId, clues, startedAt, onSolve }: Props)
   const oxRef = useRef(0);
   const oyRef = useRef(0);
   const liveGridRef = useRef([...grid]); // definitive grid during drag
-  const solvedRef = useRef(false);
+  const solvedRef = useRef(initialSolved);
 
   // Keep liveGridRef in sync when grid changes outside a drag
   useEffect(() => {
@@ -201,7 +202,7 @@ export default function Nonogram({ puzzleId, clues, startedAt, onSolve }: Props)
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.board}>
+      <div className={styles.board} style={{ paddingRight: gutterW }}>
         {/* Col clues row */}
         <div className={styles.colsRow}>
           <div className={styles.corner} style={{ width: gutterW }} />

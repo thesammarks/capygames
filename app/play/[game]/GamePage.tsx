@@ -104,7 +104,7 @@ export default function GamePage({
           <span className={styles.meta}>
             {gameName} · Daily #{dailyNumber}
           </span>
-          {startedAt && <GameClock startedAt={startedAt} paused={showStart} />}
+          {startedAt && <GameClock startedAt={startedAt} paused={showStart || status === "solved"} />}
           <ThemeToggle />
         </div>
       </header>
@@ -129,6 +129,7 @@ export default function GamePage({
           puzzleId={puzzleId}
           clues={(puzzleData as { clues: string }).clues}
           startedAt={startedAt}
+          initialSolved={status === "solved"}
           glyph={glyph}
           onSolve={handleSolve}
         />
@@ -139,6 +140,7 @@ export default function GamePage({
           puzzleId={puzzleId}
           clues={(puzzleData as { clues: { rows: number[][]; cols: number[][] } }).clues}
           startedAt={startedAt}
+          initialSolved={status === "solved"}
           onSolve={handleSolve}
         />
       )}

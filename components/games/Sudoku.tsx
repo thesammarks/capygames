@@ -10,6 +10,7 @@ interface Props {
   puzzleId: number;
   clues: string;
   startedAt: number | null;
+  initialSolved?: boolean;
   glyph?: string;
   onSolve?: (seconds: number, assisted: boolean, submission: number[]) => void;
 }
@@ -38,14 +39,14 @@ function loadBoard(puzzleId: number, given: number[]): { val: number[]; notes: b
   return { val: [...given], notes: emptyNotes() };
 }
 
-export default function Sudoku({ puzzleId, clues, startedAt, glyph, onSolve }: Props) {
+export default function Sudoku({ puzzleId, clues, startedAt, initialSolved = false, glyph, onSolve }: Props) {
   const given = parseClues(clues);
   const [val, setVal] = useState<number[]>(() => loadBoard(puzzleId, given).val);
   const [notes, setNotes] = useState<boolean[][]>(() => loadBoard(puzzleId, given).notes);
   const [selected, setSelected] = useState<number | null>(null);
   const [notesMode, setNotesMode] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [solvedAt, setSolvedAt] = useState<number | null>(null);
+  const [solvedAt, setSolvedAt] = useState<number | null>(initialSolved ? Date.now() : null);
   const [assisted] = useState(false);
 
   const pushHist = useCallback((v: number[], n: boolean[][]) => {
