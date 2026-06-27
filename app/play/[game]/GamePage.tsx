@@ -30,11 +30,14 @@ export default function GamePage({
 }: Props) {
   const storageKey = `sg_start_${puzzleId}`;
 
-  // For new games, don't render the game until the user clicks Play (keeps puzzle hidden)
-  const [gameReady, setGameReady] = useState(initialStatus !== "new");
+  // Never pre-render the game — keeps the puzzle hidden behind the start screen
+  const [gameReady, setGameReady] = useState(false);
   const [showStart, setShowStart] = useState(true);
   const [status, setStatus] = useState(initialStatus);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  // Stateful so handleSolve can update them from the API response
+  const [currentStreak, setCurrentStreak] = useState(streak);
+  const [currentBest, setCurrentBest] = useState(bestSeconds);
 
   // Restore startedAt: sessionStorage first (fast path), then localStorage (survives tab close)
   useEffect(() => {
@@ -62,8 +65,10 @@ export default function GamePage({
   }, [game]);
 
   function handlePlay() {
-    if (!gameReady) setGameReady(true);
+    setGameReady(true);
     setShowStart(false);
+    // Don't touch progress for already-completed games
+    if (status === "solved") return;
     const today = new Date().toISOString().slice(0, 10);
     if (!startedAt) {
       const t = Date.now();
@@ -80,11 +85,16 @@ export default function GamePage({
     const today = new Date().toISOString().slice(0, 10);
     setGuestProgress(today, game, "solved", seconds);
     try {
-      await fetch("/api/complete", {
+      const res = await fetch("/api/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ game, clientSeconds: seconds, submission, assisted }),
       });
+      if (res.ok) {
+        const data = await res.json() as { streak?: number; best?: number | null };
+        if (data.streak != null) setCurrentStreak(data.streak);
+        if (data.best != null) setCurrentBest(data.best);
+      }
     } catch {
       // Non-critical: result already shown in UI
     }
@@ -116,8 +126,8 @@ export default function GamePage({
           glyph={glyph}
           rule={rule}
           dailyNumber={dailyNumber}
-          streak={streak}
-          bestSeconds={bestSeconds}
+          streak={currentStreak}
+          bestSeconds={currentBest}
           status={status}
           startedAt={startedAt}
           onPlay={handlePlay}
