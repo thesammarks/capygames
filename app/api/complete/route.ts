@@ -67,9 +67,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: rpcError.message }, { status: 500 });
     }
 
+    // PostgREST wraps composite-type returns in an array even for single-row functions
+    const statsRow = Array.isArray(stats) ? stats[0] : stats;
+
     return NextResponse.json({
-      streak: stats?.current_streak ?? 0,
-      best: stats?.best_seconds ?? null,
+      streak: statsRow?.current_streak ?? 0,
+      best: statsRow?.best_seconds ?? null,
       rank: null,
     });
   } else {

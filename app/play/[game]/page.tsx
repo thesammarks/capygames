@@ -41,29 +41,37 @@ export default async function PlayPage({ params }: Props) {
   let streak = 0;
   let bestSeconds: number | null = null;
   let gameStatus: "new" | "in_progress" | "solved" = "new";
+  let solvedSeconds: number | null = null;
 
   if (user) {
-    const { data: stats } = await userClient
+    const { data: stats, error: statsError } = await userClient
       .from("stats")
       .select("current_streak, best_seconds")
       .eq("user_id", user.id)
       .eq("game", game)
       .single();
 
+    if (statsError && statsError.code !== "PGRST116") {
+      console.error("[play/page] stats query error:", statsError);
+    }
     if (stats) {
       streak = stats.current_streak ?? 0;
       bestSeconds = stats.best_seconds ?? null;
     }
 
-    const { data: progress } = await userClient
+    const { data: progress, error: progressError } = await userClient
       .from("progress")
-      .select("status")
+      .select("status, duration_seconds")
       .eq("user_id", user.id)
       .eq("puzzle_id", puzzle.id)
       .single();
 
+    if (progressError && progressError.code !== "PGRST116") {
+      console.error("[play/page] progress query error:", progressError);
+    }
     if (progress) {
       gameStatus = progress.status as "in_progress" | "solved";
+      if (progress.status === "solved") solvedSeconds = progress.duration_seconds ?? null;
     }
   }
 
@@ -82,6 +90,7 @@ export default async function PlayPage({ params }: Props) {
       streak={streak}
       bestSeconds={bestSeconds}
       initialStatus={gameStatus}
+      solvedSeconds={solvedSeconds}
     />
   );
 }

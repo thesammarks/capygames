@@ -10,11 +10,12 @@ interface Props {
   clues: { rows: number[][]; cols: number[][] };
   startedAt: number | null;
   initialSolved?: boolean;
+  solvedSeconds?: number | null;
   glyph?: string;
   onSolve?: (seconds: number, assisted: boolean, submission: number[]) => void;
 }
 
-export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = false, onSolve }: Props) {
+export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = false, solvedSeconds, onSolve }: Props) {
   const N = clues.rows.length;
   const BOARD_KEY = `cg_board_${puzzleId}`;
 
@@ -198,11 +199,18 @@ export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = f
     setGrid([...empty]);
   }
 
-  const elapsed = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : 0;
+  // Time to display: prefer live startedAt, fall back to DB value when revisiting from a new session
+  const elapsed = startedAt
+    ? Math.floor((Date.now() - startedAt) / 1000)
+    : solvedSeconds ?? 0;
+
+  // If solved in a previous session and localStorage is gone, the grid is blank.
+  // Don't render a blank interactive board — just show the completion card.
+  const hasBoard = !initialSolved || grid.some((v) => v !== 0);
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.board} style={{ paddingRight: gutterW }}>
+      {hasBoard && <div className={styles.board} style={{ paddingRight: gutterW }}>
         {/* Col clues row */}
         <div className={styles.colsRow}>
           <div className={styles.corner} style={{ width: gutterW }} />
@@ -260,39 +268,40 @@ export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = f
             })}
           </div>
         </div>
-      </div>
+      </div>}
 
-      {/* Toolbar */}
-      <div className={styles.toolbar}>
-        <button
-          className={`${styles.toolBtn}${tool === 1 ? " " + styles.active : ""}`}
-          onClick={() => setTool(1)}
-          aria-pressed={tool === 1}
-        >
-          Fill
-        </button>
-        <button
-          className={`${styles.toolBtn}${tool === 2 ? " " + styles.active : ""}`}
-          onClick={() => setTool(2)}
-          aria-pressed={tool === 2}
-        >
-          ✕ Mark
-        </button>
-        <button
-          className={styles.toolBtn}
-          onClick={undo}
-          disabled={!history.length || solved}
-        >
-          Undo
-        </button>
-        <button
-          className={styles.toolBtn}
-          onClick={reset}
-          disabled={solved}
-        >
-          Reset
-        </button>
-      </div>
+      {hasBoard && (
+        <div className={styles.toolbar}>
+          <button
+            className={`${styles.toolBtn}${tool === 1 ? " " + styles.active : ""}`}
+            onClick={() => setTool(1)}
+            aria-pressed={tool === 1}
+          >
+            Fill
+          </button>
+          <button
+            className={`${styles.toolBtn}${tool === 2 ? " " + styles.active : ""}`}
+            onClick={() => setTool(2)}
+            aria-pressed={tool === 2}
+          >
+            ✕ Mark
+          </button>
+          <button
+            className={styles.toolBtn}
+            onClick={undo}
+            disabled={!history.length || solved}
+          >
+            Undo
+          </button>
+          <button
+            className={styles.toolBtn}
+            onClick={reset}
+            disabled={solved}
+          >
+            Reset
+          </button>
+        </div>
+      )}
 
       {solved && (
         <div className={styles.winBanner}>

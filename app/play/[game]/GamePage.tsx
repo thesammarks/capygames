@@ -22,11 +22,12 @@ interface Props {
   streak: number;
   bestSeconds: number | null;
   initialStatus: "new" | "in_progress" | "solved";
+  solvedSeconds?: number | null;
 }
 
 export default function GamePage({
   game, gameName, gameJp, glyph, rule,
-  puzzleId, puzzleData, dailyNumber, streak, bestSeconds, initialStatus,
+  puzzleId, puzzleData, dailyNumber, streak, bestSeconds, initialStatus, solvedSeconds,
 }: Props) {
   const storageKey = `sg_start_${puzzleId}`;
 
@@ -151,6 +152,7 @@ export default function GamePage({
           clues={(puzzleData as { clues: { rows: number[][]; cols: number[][] } }).clues}
           startedAt={startedAt}
           initialSolved={status === "solved"}
+          solvedSeconds={solvedSeconds}
           onSolve={handleSolve}
         />
       )}
