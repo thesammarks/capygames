@@ -26,11 +26,14 @@ export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = f
         const stored = localStorage.getItem(BOARD_KEY);
         if (stored) {
           const parsed = JSON.parse(stored) as number[];
-          if (Array.isArray(parsed) && parsed.length === N * N) return parsed;
+          // Only restore if the board has actual content — an all-zeros board means
+          // the save happened before any moves and should not block solvedAnswer reconstruction.
+          if (Array.isArray(parsed) && parsed.length === N * N && parsed.some((v) => v !== 0))
+            return parsed;
         }
       } catch {}
     }
-    // No localStorage — if already solved and answer provided, reconstruct the completed grid
+    // No localStorage (or empty board) — reconstruct from server answer if already solved
     if (initialSolved && solvedAnswer && solvedAnswer.length === N * N) {
       return [...solvedAnswer].map((c) => (c === "1" ? 1 : 2));
     }

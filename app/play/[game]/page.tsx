@@ -87,7 +87,7 @@ export default async function PlayPage({ params }: Props) {
     ) {
       // Stats row missing for a solved puzzle — backfill by replaying record_solve.
       // Both progress and stats use ON CONFLICT DO UPDATE so this is safe to repeat.
-      const { data: repaired } = await userClient.rpc("record_solve", {
+      const { data: repaired, error: repairErr } = await userClient.rpc("record_solve", {
         p_puzzle_id: puzzle.id,
         p_seconds: progress.duration_seconds,
         p_assisted: progress.assisted ?? false,
@@ -98,6 +98,7 @@ export default async function PlayPage({ params }: Props) {
         bestSeconds = (rs as { best_seconds?: number | null }).best_seconds ?? null;
       }
     }
+
   }
 
   const dayNum = dailyNumber(game, today);
