@@ -21,6 +21,7 @@ interface Props {
   dailyNumber: number;
   streak: number;
   bestSeconds: number | null;
+  isAuthenticated: boolean;
   initialStatus: "new" | "in_progress" | "solved";
   solvedSeconds?: number | null;
   solvedAnswer?: string | null;
@@ -28,7 +29,8 @@ interface Props {
 
 export default function GamePage({
   game, gameName, gameJp, glyph, rule,
-  puzzleId, puzzleData, dailyNumber, streak, bestSeconds, initialStatus, solvedSeconds, solvedAnswer,
+  puzzleId, puzzleData, dailyNumber, streak, bestSeconds,
+  isAuthenticated, initialStatus, solvedSeconds, solvedAnswer,
 }: Props) {
   const storageKey = `sg_start_${puzzleId}`;
 
@@ -56,15 +58,15 @@ export default function GamePage({
     }
   }, [storageKey, game]);
 
-  // Sync status from localStorage for guests (server always sends "new").
-  // Do NOT set gameReady here — board stays hidden until the user clicks Continue.
-  // Board state is restored lazily by Sudoku's loadBoard initializer on mount.
+  // For guests only: sync status from localStorage (server can't see guest progress).
+  // Authenticated users trust the DB — localStorage may be stale after PostLoginMigrate clears it.
   useEffect(() => {
+    if (isAuthenticated) return;
     const today = new Date().toISOString().slice(0, 10);
     const prog = getGuestProgress(today)[game];
     if (!prog) return;
     setStatus(prog.status);
-  }, [game]);
+  }, [game, isAuthenticated]);
 
   function handlePlay() {
     setGameReady(true);
@@ -83,11 +85,10 @@ export default function GamePage({
   }
 
   async function handleSolve(seconds: number, assisted: boolean, submission: unknown) {
-    setStatus("solved");
     const today = new Date().toISOString().slice(0, 10);
-    setGuestProgress(today, game, "solved", seconds);
-    // Hold the win state visible for 1.5s, then reveal the result screen with updated stats
+    // Hold win state visible for at least 1.5s before showing the result screen
     const delay = new Promise<void>((r) => setTimeout(r, 1500));
+    let confirmed = false;
     try {
       const res = await fetch("/api/complete", {
         method: "POST",
@@ -98,12 +99,16 @@ export default function GamePage({
         const data = await res.json() as { streak?: number; best?: number | null };
         if (data.streak != null) setCurrentStreak(data.streak);
         if (data.best != null) setCurrentBest(data.best);
+        // Only confirm solve locally once the server has recorded it
+        setStatus("solved");
+        setGuestProgress(today, game, "solved", seconds);
+        confirmed = true;
       }
     } catch {
-      // Non-critical: win banner already shown
+      // Network error: win banner stays, start screen not shown — user can retry on revisit
     }
     await delay;
-    setShowStart(true);
+    if (confirmed) setShowStart(true);
   }
 
   return (

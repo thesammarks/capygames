@@ -25,11 +25,15 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refresh session — required for @supabase/ssr to work correctly
+  // Refresh the session so server components always see a valid JWT.
+  // IMPORTANT: Do not remove this line — it's what keeps the user logged in
+  // between requests. The result is intentionally unused here.
   await supabase.auth.getUser();
 
   return supabaseResponse;
 }
+
+export const runtime = "nodejs";
 
 export const proxyConfig = {
   matcher: [

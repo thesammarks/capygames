@@ -5,7 +5,7 @@ import { checkWin as nonogramCheckWin } from "@/lib/games/nonogram";
 import { todayUTC } from "@/lib/daily";
 import { NextResponse } from "next/server";
 
-const MIN_SECONDS = 10; // sub-human floor
+const MIN_SECONDS = 3; // sub-human floor
 
 export async function POST(request: Request) {
   const body = await request.json();

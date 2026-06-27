@@ -37,6 +37,7 @@ export default async function PlayPage({ params }: Props) {
   // Fetch user stats for streak/best display
   const userClient = await createClient();
   const { data: { user } } = await userClient.auth.getUser();
+  const isAuthenticated = !!user;
 
   let streak = 0;
   let bestSeconds: number | null = null;
@@ -94,6 +95,7 @@ export default async function PlayPage({ params }: Props) {
       dailyNumber={dayNum}
       streak={streak}
       bestSeconds={bestSeconds}
+      isAuthenticated={isAuthenticated}
       initialStatus={gameStatus}
       solvedSeconds={solvedSeconds}
       solvedAnswer={solvedAnswer}
