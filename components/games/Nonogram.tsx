@@ -112,27 +112,6 @@ export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = f
     return true;
   }
 
-  function autoMark(g: number[]): number[] {
-    let changed = false;
-    const next = [...g];
-    for (let y = 0; y < N; y++) {
-      if (lineMatches(next.slice(y * N, (y + 1) * N), clues.rows[y])) {
-        for (let x = 0; x < N; x++) {
-          if (next[y * N + x] === 0) { next[y * N + x] = 2; changed = true; }
-        }
-      }
-    }
-    for (let x = 0; x < N; x++) {
-      const col = Array.from({ length: N }, (_, y) => next[y * N + x]);
-      if (lineMatches(col, clues.cols[x])) {
-        for (let y = 0; y < N; y++) {
-          if (next[y * N + x] === 0) { next[y * N + x] = 2; changed = true; }
-        }
-      }
-    }
-    return changed ? next : g;
-  }
-
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (solvedRef.current) return;
     const pos = cellAt(e.clientX, e.clientY);
@@ -166,12 +145,6 @@ export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = f
     if (!drawingRef.current) return;
     drawingRef.current = false;
     axisRef.current = null;
-    // Auto-mark satisfied rows/cols
-    const marked = autoMark(liveGridRef.current);
-    if (marked !== liveGridRef.current) {
-      liveGridRef.current = marked;
-      setGrid([...marked]);
-    }
     // Check win
     if (!solvedRef.current && isComplete(liveGridRef.current, clues.rows, clues.cols)) {
       solvedRef.current = true;
