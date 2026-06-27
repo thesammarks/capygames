@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
 import { GAMES, RULES } from "@/lib/rules";
@@ -7,6 +8,16 @@ import GamePage from "./GamePage";
 
 interface Props {
   params: Promise<{ game: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { game } = await params;
+  const gameMeta = GAMES.find((g) => g.id === game);
+  if (!gameMeta) return {};
+  return {
+    title: gameMeta.name,
+    description: `Play today's daily ${gameMeta.name} puzzle on Capygames.`,
+  };
 }
 
 export default async function PlayPage({ params }: Props) {

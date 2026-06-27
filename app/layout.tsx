@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Zen_Maru_Gothic, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
 
@@ -16,9 +16,40 @@ const zenKaku = Zen_Kaku_Gothic_New({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://capygames.app";
+const DESCRIPTION =
+  "Five free daily puzzle games — Nonogram, Nonomini, Sudoku, Bridges, and Kakuro. A new puzzle every day.";
+
 export const metadata: Metadata = {
-  title: "Capygames",
-  description: "Daily puzzle games — Nonogram, Sudoku, Bridges, Kakuro",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Capygames",
+    template: "%s · Capygames",
+  },
+  description: DESCRIPTION,
+  keywords: ["nonogram", "nonomini", "sudoku", "kakuro", "bridges", "daily puzzle", "puzzle game"],
+  authors: [{ name: "Capysoft" }],
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Capygames",
+    title: "Capygames — Daily Puzzle Games",
+    description: DESCRIPTION,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary",
+    title: "Capygames — Daily Puzzle Games",
+    description: DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#F2922B",
 };
 
 export default function RootLayout({
