@@ -11,11 +11,12 @@ interface Props {
   startedAt: number | null;
   initialSolved?: boolean;
   solvedSeconds?: number | null;
+  solvedAnswer?: string | null;
   glyph?: string;
   onSolve?: (seconds: number, assisted: boolean, submission: number[]) => void;
 }
 
-export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = false, solvedSeconds, onSolve }: Props) {
+export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = false, solvedSeconds, solvedAnswer, onSolve }: Props) {
   const N = clues.rows.length;
   const BOARD_KEY = `cg_board_${puzzleId}`;
 
@@ -28,6 +29,10 @@ export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = f
           if (Array.isArray(parsed) && parsed.length === N * N) return parsed;
         }
       } catch {}
+    }
+    // No localStorage — if already solved and answer provided, reconstruct the completed grid
+    if (initialSolved && solvedAnswer && solvedAnswer.length === N * N) {
+      return [...solvedAnswer].map((c) => (c === "1" ? 1 : 2));
     }
     return Array(N * N).fill(0);
   });
@@ -204,8 +209,7 @@ export default function Nonogram({ puzzleId, clues, startedAt, initialSolved = f
     ? Math.floor((Date.now() - startedAt) / 1000)
     : solvedSeconds ?? 0;
 
-  // If solved in a previous session and localStorage is gone, the grid is blank.
-  // Don't render a blank interactive board — just show the completion card.
+  // Hide the board only if solved with no state to display (no localStorage AND no solvedAnswer)
   const hasBoard = !initialSolved || grid.some((v) => v !== 0);
 
   return (

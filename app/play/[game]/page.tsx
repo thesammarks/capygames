@@ -18,10 +18,10 @@ export default async function PlayPage({ params }: Props) {
   const service = createServiceClient();
   const today = todayUTC();
 
-  // Fetch puzzle WITHOUT solution (strips it below)
+  // Fetch puzzle (solution only passed to client when already solved)
   const { data: puzzle } = await service
     .from("puzzles")
-    .select("id, data, play_date")
+    .select("id, data, play_date, solution")
     .eq("game", game)
     .eq("play_date", today)
     .single();
@@ -42,6 +42,7 @@ export default async function PlayPage({ params }: Props) {
   let bestSeconds: number | null = null;
   let gameStatus: "new" | "in_progress" | "solved" = "new";
   let solvedSeconds: number | null = null;
+  let solvedAnswer: string | null = null;
 
   if (user) {
     const { data: stats, error: statsError } = await userClient
@@ -71,7 +72,11 @@ export default async function PlayPage({ params }: Props) {
     }
     if (progress) {
       gameStatus = progress.status as "in_progress" | "solved";
-      if (progress.status === "solved") solvedSeconds = progress.duration_seconds ?? null;
+      if (progress.status === "solved") {
+        solvedSeconds = progress.duration_seconds ?? null;
+        const sol = puzzle.solution as { answer?: string } | null;
+        solvedAnswer = sol?.answer ?? null;
+      }
     }
   }
 
@@ -91,6 +96,7 @@ export default async function PlayPage({ params }: Props) {
       bestSeconds={bestSeconds}
       initialStatus={gameStatus}
       solvedSeconds={solvedSeconds}
+      solvedAnswer={solvedAnswer}
     />
   );
 }

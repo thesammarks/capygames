@@ -70,9 +70,17 @@ export async function POST(request: Request) {
     // PostgREST wraps composite-type returns in an array even for single-row functions
     const statsRow = Array.isArray(stats) ? stats[0] : stats;
 
+    // Direct DB read as definitive fallback — guards against null-wrapped RPC returns
+    const { data: freshStats } = await userClient
+      .from("stats")
+      .select("current_streak, best_seconds")
+      .eq("user_id", user.id)
+      .eq("game", puzzle.game)
+      .single();
+
     return NextResponse.json({
-      streak: statsRow?.current_streak ?? 0,
-      best: statsRow?.best_seconds ?? null,
+      streak: freshStats?.current_streak ?? statsRow?.current_streak ?? 0,
+      best: freshStats?.best_seconds ?? statsRow?.best_seconds ?? null,
       rank: null,
     });
   } else {
