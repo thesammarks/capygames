@@ -146,6 +146,7 @@ begin
       total_solved     = stats.total_solved + case when stats.last_solved_date = d then 0 else 1 end,
       last_solved_date = d;
 
-  return (select * from stats where user_id = auth.uid() and game = g);
+  select * into cur from stats where user_id = auth.uid() and game = g;
+  return cur;
 end;
 $$ language plpgsql;
