@@ -46,37 +46,56 @@ export default async function PlayPage({ params }: Props) {
   let solvedAnswer: string | null = null;
 
   if (user) {
-    const { data: stats, error: statsError } = await userClient
-      .from("stats")
-      .select("current_streak, best_seconds")
-      .eq("user_id", user.id)
-      .eq("game", game)
-      .single();
+    const [{ data: stats, error: statsError }, { data: progress, error: progressError }] = await Promise.all([
+      userClient
+        .from("stats")
+        .select("current_streak, best_seconds")
+        .eq("user_id", user.id)
+        .eq("game", game)
+        .single(),
+      userClient
+        .from("progress")
+        .select("status, duration_seconds, assisted")
+        .eq("user_id", user.id)
+        .eq("puzzle_id", puzzle.id)
+        .single(),
+    ]);
 
     if (statsError && statsError.code !== "PGRST116") {
       console.error("[play/page] stats query error:", statsError);
     }
-    if (stats) {
-      streak = stats.current_streak ?? 0;
-      bestSeconds = stats.best_seconds ?? null;
-    }
-
-    const { data: progress, error: progressError } = await userClient
-      .from("progress")
-      .select("status, duration_seconds")
-      .eq("user_id", user.id)
-      .eq("puzzle_id", puzzle.id)
-      .single();
-
     if (progressError && progressError.code !== "PGRST116") {
       console.error("[play/page] progress query error:", progressError);
     }
+
     if (progress) {
       gameStatus = progress.status as "in_progress" | "solved";
       if (progress.status === "solved") {
         solvedSeconds = progress.duration_seconds ?? null;
         const sol = puzzle.solution as { answer?: string } | null;
         solvedAnswer = sol?.answer ?? null;
+      }
+    }
+
+    if (stats) {
+      streak = stats.current_streak ?? 0;
+      bestSeconds = stats.best_seconds ?? null;
+    } else if (
+      gameStatus === "solved" &&
+      progress?.duration_seconds != null &&
+      progress.duration_seconds >= 1
+    ) {
+      // Stats row missing for a solved puzzle — backfill by replaying record_solve.
+      // Both progress and stats use ON CONFLICT DO UPDATE so this is safe to repeat.
+      const { data: repaired } = await userClient.rpc("record_solve", {
+        p_puzzle_id: puzzle.id,
+        p_seconds: progress.duration_seconds,
+        p_assisted: progress.assisted ?? false,
+      });
+      const rs = Array.isArray(repaired) ? repaired[0] : repaired;
+      if (rs) {
+        streak = (rs as { current_streak?: number }).current_streak ?? 0;
+        bestSeconds = (rs as { best_seconds?: number | null }).best_seconds ?? null;
       }
     }
   }
